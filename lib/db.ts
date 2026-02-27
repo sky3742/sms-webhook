@@ -1,55 +1,56 @@
+import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import path from 'path';
+import * as schema from './schema';
 
-const dbPath = path.join(process.cwd(), 'sms.db');
+const dbPath = process.env.TURSO_DATABASE_URL || 'file:sms.db';
 
 // Initialize Turso/SQLite client
-const db = createClient({
-    url: `file:${dbPath}`
+const client = createClient({
+    url: dbPath
 });
 
-// Initialize schema
-db.execute(`
-    CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        subject TEXT NOT NULL,
-        message TEXT NOT NULL,
-        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+// Initialize Drizzle ORM
+export const db = drizzle(client, { schema });
+
+// Database schema type exports
+export type Message = typeof schema.messages.$inferSelect;
+export type NewMessage = typeof schema.messages.$inferInsert;
+
+// Helper functions using Drizzle
+export async function addMessage(subject: string, message: string) {
+    const newMessage = await db.insert(schema.messages).values({
+        subject,
+        message,
+        createdAt: Date.now()
+    }).returning();
+
+    return newMessage[0];
+}
+
+export async function getMessageById(id: number) {
+    const result = await db.select().from(schema.messages).where(
+        // @ts-ignore - SQLite specific
+        schema.messages.id.equals(id)
     );
-
-    CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
-`);
-
-export interface Message {
-    id: number;
-    subject: string;
-    message: string;
-    created_at: number;
+    return result[0];
 }
 
-export function addMessage(subject: string, message: string): Message {
-    const stmt = db.prepare('INSERT INTO messages (subject, message) VALUES (?, ?)');
-    const result = stmt.run(subject, message);
-    return getMessageById(result.lastInsertRowid as number);
+export async function getAllMessages(limit: number = 100, offset: number = 0) {
+    return await db.select().from(schema.messages)
+        .orderBy(schema.messages.createdAt)
+        .limit(limit)
+        .offset(offset);
 }
 
-export function getMessageById(id: number): Message | undefined {
-    const stmt = db.prepare('SELECT * FROM messages WHERE id = ?');
-    return stmt.get(id) as Message | undefined;
-}
-
-export function getAllMessages(limit: number = 100, offset: number = 0): Message[] {
-    const stmt = db.prepare('SELECT * FROM messages ORDER BY created_at DESC LIMIT ? OFFSET ?');
-    return stmt.all(limit, offset) as Message[];
-}
-
-export function deleteMessage(id: number): boolean {
-    const stmt = db.prepare('DELETE FROM messages WHERE id = ?');
-    const result = stmt.run(id);
+export async function deleteMessage(id: number) {
+    const result = await db.delete(schema.messages).where(
+        // @ts-ignore - SQLite specific
+        schema.messages.id.equals(id)
+    );
     return result.changes > 0;
 }
 
-export function getMessageCount(): number {
-    const stmt = db.prepare('SELECT COUNT(*) as count FROM messages');
-    return (stmt.get() as { count: number }).count;
+export async function getMessageCount() {
+    const result = await db.select({ count: schema.messages.id }).from(schema.messages);
+    return result.length;
 }

@@ -19,12 +19,12 @@ export async function POST(request: NextRequest) {
         const formattedSender = formatPhoneNumber(parsed.sender);
 
         // Save message to database with formatted phone number
-        const message = addMessage(formattedSender, parsed.content);
+        const message = await addMessage(formattedSender, parsed.content);
 
         return NextResponse.json({
             success: true,
             message_id: message.id,
-            timestamp: message.created_at,
+            timestamp: message.createdAt,
             sender: formattedSender
         }, { status: 200 });
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
 // Health check endpoint
 export async function GET() {
-    const count = getMessageCount();
+    const count = await getMessageCount();
 
     return NextResponse.json({
         status: 'ok',

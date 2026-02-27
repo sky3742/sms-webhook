@@ -12,6 +12,9 @@ sms.db
 *.db-shm
 *.db-wal
 
+# Drizzle migrations
+drizzle/*.sql
+
 # Next.js
 .next/
 out/

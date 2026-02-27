@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllMessages, getMessageCount, getMessageById, deleteMessage } from '@/lib/db';
+import { getAllMessages, getMessageCount, deleteMessage } from '@/lib/db';
 import { formatPhoneNumber } from '@/lib/sms-parser';
 
 // GET all messages
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '100');
         const offset = parseInt(searchParams.get('offset') || '0');
 
-        const messages = getAllMessages(limit, offset);
+        const messages = await getAllMessages(limit, offset);
 
         // Format sender phone numbers
         const formattedMessages = messages.map(msg => ({
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
             sender: formatPhoneNumber(msg.subject)
         }));
 
-        const count = getMessageCount();
+        const count = await getMessageCount();
 
         return NextResponse.json({
             messages: formattedMessages,
@@ -47,7 +47,7 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        const success = deleteMessage(parseInt(id));
+        const success = await deleteMessage(parseInt(id));
 
         if (success) {
             return NextResponse.json({
