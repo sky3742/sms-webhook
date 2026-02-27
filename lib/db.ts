@@ -1,11 +1,15 @@
-import Database from 'better-sqlite3';
+import { createClient } from '@libsql/client';
 import path from 'path';
 
 const dbPath = path.join(process.cwd(), 'sms.db');
-const db = new Database(dbPath);
+
+// Initialize Turso/SQLite client
+const db = createClient({
+    url: `file:${dbPath}`
+});
 
 // Initialize schema
-db.exec(`
+db.execute(`
     CREATE TABLE IF NOT EXISTS messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         subject TEXT NOT NULL,
