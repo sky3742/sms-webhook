@@ -2,7 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { addMessage, getMessageCount } from '@/lib/db';
 import { parseSmsMessage, formatPhoneNumber } from '@/lib/sms-parser';
 import { sendPushNotificationToAll } from '@/lib/push-notifications';
-import { subscriptions } from '@/app/api/subscribe/route';
+import { createClient } from '@libsql/client';
+
+const dbPath = process.env.TURSO_DATABASE_URL || 'file:sms.db';
+const dbToken = process.env.TURSO_AUTH_TOKEN;
+
+const client = createClient({
+    url: dbPath,
+    authToken: dbToken
+});
 
 export async function POST(request: NextRequest) {
     try {
@@ -23,6 +31,20 @@ export async function POST(request: NextRequest) {
         // Save message to database with formatted phone number
         const message = await addMessage(formattedSender, parsed.content);
 
+        // Get all subscriptions from database
+        const result = await client.execute({
+            sql: `SELECT * FROM push_subscriptions`,
+            args: []
+        });
+
+        const subscriptions = result.rows.map((row: any) => ({
+            endpoint: row.endpoint,
+            keys: {
+                p256dh: row.p256dh,
+                auth: row.auth
+            }
+        }));
+
         // Send push notification to all subscribers
         const payload = {
             title: `New SMS from ${formattedSender}`,
@@ -35,10 +57,7 @@ export async function POST(request: NextRequest) {
             }
         };
 
-        const sentCount = await sendPushNotificationToAll(
-            Array.from(subscriptions).map(sub => JSON.parse(sub)),
-            payload
-        );
+        const sentCount = await sendPushNotificationToAll(subscriptions, payload);
 
         console.log(`Push notification sent to ${sentCount} subscriber(s)`);
 
