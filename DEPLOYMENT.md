@@ -6,14 +6,10 @@ Create a `.env.local` file in the project root with these variables:
 
 ```bash
 # Turso Database
-TURSO_DATABASE_URL=libsql://sms-webhook-sky3742.aws-ap-northeast-1.turso.io
-TURSO_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzIxOTQ3ODcsImlkIjoiMDE5YzlmMDktOTQwMS03Nzg1LTg1NTItODgwNDJmYmFlYTIwIiwicmlkIjoiOTc0YTU4MzAtYzgyMy00ZDc1LWJkMmEtODE2Y2IwMDdlMWU1In0.38Y4-3iOdz2O8ob8oOeHbfdlCntfzCsr3S3PRUKvHjnbExKq0utauAAhkq9XbKIEqcPQGpQWg6dBQZtYfckvCA
+TURSO_DATABASE_URL=libsql://your-db.turso.io
+TURSO_AUTH_TOKEN=your-auth-token
 
 # VAPID Keys for Push Notifications
-VAPID_PUBLIC_KEY=NEXT_PUBLIC_VAPID_PUBLIC_KEY=<REDACTED_FOR_HISTORY>
-VAPID_PRIVATE_KEY=VAPID_PRIVATE_KEY=<REDACTED_FOR_HISTORY>
-
-# Next.js (exposes VAPID public key to client)
 NEXT_PUBLIC_VAPID_PUBLIC_KEY=NEXT_PUBLIC_VAPID_PUBLIC_KEY=<REDACTED_FOR_HISTORY>
 ```
 
@@ -34,8 +30,6 @@ vercel
 2. Add environment variables:
    - `TURSO_DATABASE_URL`
    - `TURSO_AUTH_TOKEN`
-   - `VAPID_PUBLIC_KEY`
-   - `VAPID_PRIVATE_KEY`
    - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
 
 ### Option 2: Railway
@@ -100,7 +94,7 @@ Check the server logs for push notification status:
 ## Troubleshooting
 
 ### Push notifications not working
-1. Check VAPID keys are configured correctly
+1. Check `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is configured correctly
 2. Verify client has granted notification permission
 3. Check browser console for errors
 4. Ensure service worker is registered
