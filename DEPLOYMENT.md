@@ -1,0 +1,116 @@
+# Deployment Guide
+
+## Environment Variables
+
+Create a `.env.local` file in the project root with these variables:
+
+```bash
+# Turso Database
+TURSO_DATABASE_URL=libsql://sms-webhook-sky3742.aws-ap-northeast-1.turso.io
+TURSO_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzIxOTQ3ODcsImlkIjoiMDE5YzlmMDktOTQwMS03Nzg1LTg1NTItODgwNDJmYmFlYTIwIiwicmlkIjoiOTc0YTU4MzAtYzgyMy00ZDc1LWJkMmEtODE2Y2IwMDdlMWU1In0.38Y4-3iOdz2O8ob8oOeHbfdlCntfzCsr3S3PRUKvHjnbExKq0utauAAhkq9XbKIEqcPQGpQWg6dBQZtYfckvCA
+
+# VAPID Keys for Push Notifications
+VAPID_PUBLIC_KEY=NEXT_PUBLIC_VAPID_PUBLIC_KEY=<REDACTED_FOR_HISTORY>
+VAPID_PRIVATE_KEY=VAPID_PRIVATE_KEY=<REDACTED_FOR_HISTORY>
+
+# Next.js (exposes VAPID public key to client)
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=NEXT_PUBLIC_VAPID_PUBLIC_KEY=<REDACTED_FOR_HISTORY>
+```
+
+## Deployment Options
+
+### Option 1: Vercel (Recommended)
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
+
+**Environment Variables in Vercel Dashboard:**
+1. Go to Vercel project settings
+2. Add environment variables:
+   - `TURSO_DATABASE_URL`
+   - `TURSO_AUTH_TOKEN`
+   - `VAPID_PUBLIC_KEY`
+   - `VAPID_PRIVATE_KEY`
+   - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+
+### Option 2: Railway
+
+```bash
+# Install Railway CLI
+npm i -g @railway/cli
+
+# Deploy
+railway up
+```
+
+### Option 3: Render
+
+```bash
+# Push to GitHub
+git push
+
+# Deploy on Render
+# Or use: render deploy
+```
+
+### Option 4: Docker
+
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+Build and run:
+```bash
+docker build -t sms-webhook .
+docker run -p 3000:3000 --env-file .env.local sms-webhook
+```
+
+## SMS Forwarder Configuration
+
+Set the webhook URL in SMS Forwarder to:
+```
+https://your-app.vercel.app/api/webhook
+```
+
+## Database Backup
+
+To backup your Turso database:
+```bash
+npx drizzle-kit push --config=drizzle.config.ts
+```
+
+## Monitoring
+
+Check the server logs for push notification status:
+- Success: `Push notification sent to N subscriber(s)`
+- Error: Check console logs for details
+
+## Troubleshooting
+
+### Push notifications not working
+1. Check VAPID keys are configured correctly
+2. Verify client has granted notification permission
+3. Check browser console for errors
+4. Ensure service worker is registered
+
+### Database connection errors
+1. Verify `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` are correct
+2. Check Turso database is active
+3. Verify database URL format: `libsql://your-db.turso.io`
+
+### Webhook not receiving messages
+1. Verify webhook URL is correct
+2. Check server is running
+3. Verify SMS Forwarder is sending data in correct format
