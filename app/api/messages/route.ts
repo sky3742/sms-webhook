@@ -12,9 +12,9 @@ export async function GET(request: NextRequest) {
         const messages = await getAllMessages(limit, offset);
 
         // Format sender phone numbers
-        const formattedMessages = messages.map(msg => ({
+        const formattedMessages = messages.map((msg: any) => ({
             ...msg,
-            sender: formatPhoneNumber(msg.subject)
+            sender: formatPhoneNumber(String(msg.subject ?? ''))
         }));
 
         const count = await getMessageCount();
