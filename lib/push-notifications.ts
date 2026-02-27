@@ -1,16 +1,15 @@
 // Server-side Push Notifications using Web Push API
 import webpush from 'web-push';
 
-// Use NEXT_PUBLIC_VAPID_PUBLIC_KEY for both client and server
+// VAPID Keys
 const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+const privateVapidKey = process.env.VAPID_PRIVATE_KEY || '';
 
-// Initialize web-push (private key is optional for VAPID verification)
-// If you have a private key, you can add it here:
-// const privateVapidKey = process.env.VAPID_PRIVATE_KEY || '';
-
+// Initialize web-push
 webpush.setVapidDetails(
     'mailto:sky@example.com',
-    publicVapidKey
+    publicVapidKey,
+    privateVapidKey
 );
 
 export interface PushSubscription {
@@ -36,8 +35,8 @@ export async function sendPushNotification(
     subscription: PushSubscription,
     payload: PushNotificationPayload
 ): Promise<void> {
-    if (!publicVapidKey) {
-        console.warn('VAPID public key not configured');
+    if (!publicVapidKey || !privateVapidKey) {
+        console.warn('VAPID keys not configured');
         return;
     }
 
@@ -45,7 +44,6 @@ export async function sendPushNotification(
         await webpush.sendNotification(subscription, JSON.stringify(payload));
     } catch (error) {
         console.error('Failed to send push notification:', error);
-        // Subscription might be expired, remove it
         throw error;
     }
 }

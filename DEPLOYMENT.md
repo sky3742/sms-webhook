@@ -11,6 +11,7 @@ TURSO_AUTH_TOKEN=your-auth-token
 
 # VAPID Keys for Push Notifications
 NEXT_PUBLIC_VAPID_PUBLIC_KEY=NEXT_PUBLIC_VAPID_PUBLIC_KEY=<REDACTED_FOR_HISTORY>
+VAPID_PRIVATE_KEY=VAPID_PRIVATE_KEY=<REDACTED_FOR_HISTORY>
 ```
 
 ## Deployment Options
@@ -31,6 +32,7 @@ vercel
    - `TURSO_DATABASE_URL`
    - `TURSO_AUTH_TOKEN`
    - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+   - `VAPID_PRIVATE_KEY`
 
 ### Option 2: Railway
 
@@ -94,7 +96,7 @@ Check the server logs for push notification status:
 ## Troubleshooting
 
 ### Push notifications not working
-1. Check `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is configured correctly
+1. Check `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` are configured correctly
 2. Verify client has granted notification permission
 3. Check browser console for errors
 4. Ensure service worker is registered
