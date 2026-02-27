@@ -5,14 +5,14 @@ import { messages } from './schema';
 const dbPath = process.env.TURSO_DATABASE_URL || 'file:sms.db';
 const dbToken = process.env.TURSO_AUTH_TOKEN;
 
-// Initialize Turso/SQLite client
+// Initialize Turso client
 const client = createClient({
     url: dbPath,
     authToken: dbToken
 });
 
-// Initialize Drizzle ORM
-export const db = drizzle(client);
+// Initialize Drizzle ORM with client
+const db = drizzle({ client });
 
 // Database schema type exports
 export type Message = typeof messages.$inferSelect;
@@ -29,7 +29,7 @@ export async function addMessage(subject: string, messageText: string) {
     // Get the inserted row
     const inserted = await client.execute({
         sql: 'SELECT * FROM messages WHERE id = ?',
-        args: [result.lastInsertRowid]
+        args: [result.lastInsertRowid || 0]
     });
 
     return inserted.rows[0];
@@ -56,7 +56,8 @@ export async function deleteMessage(id: number) {
         sql: 'DELETE FROM messages WHERE id = ?',
         args: [id]
     });
-    return result.changes > 0;
+    // Check if any row was deleted by checking the result
+    return result.rowsAffected !== undefined ? result.rowsAffected > 0 : true;
 }
 
 export async function getMessageCount() {
