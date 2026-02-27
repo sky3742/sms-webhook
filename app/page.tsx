@@ -1,16 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePushNotifications } from '@/lib/notifications';
+import { subscribeToPushNotifications, getNotificationStatus } from '@/lib/client-push';
 
 export default function Dashboard() {
     const [messages, setMessages] = useState<any[]>([]);
     const [count, setCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    const { isSupported, permission, requestPermission, sendNotification } =
-        usePushNotifications();
+    const [notificationStatus, setNotificationStatus] = useState<any>(null);
+    const [subscribed, setSubscribed] = useState(false);
 
     const loadMessages = async () => {
         try {
@@ -31,6 +30,23 @@ export default function Dashboard() {
 
     useEffect(() => {
         loadMessages();
+
+        // Check notification status
+        const status = getNotificationStatus();
+        setNotificationStatus(status);
+
+        // Subscribe to push notifications
+        if (status.supported && status.permission === 'default') {
+            subscribeToPushNotifications()
+                .then((subscription) => {
+                    if (subscription) {
+                        setSubscribed(true);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Failed to subscribe:', error);
+                });
+        }
     }, []);
 
     const handleRefresh = () => {
@@ -49,21 +65,29 @@ export default function Dashboard() {
         }
     };
 
-    const handleNotificationPermission = async () => {
-        const granted = await requestPermission();
-        if (granted) {
-            alert('Notifications enabled! You will receive alerts for new SMS messages.');
-        } else {
-            alert('Notifications disabled.');
+    const handleEnableNotifications = async () => {
+        try {
+            // Request notification permission
+            if (Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    // Subscribe to push notifications
+                    const subscription = await subscribeToPushNotifications();
+                    if (subscription) {
+                        setSubscribed(true);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to enable notifications:', error);
         }
     };
 
     const handleSendTestNotification = () => {
-        if (isSupported && permission === 'granted') {
-            sendNotification({
-                id: Date.now(),
-                subject: 'Test SMS',
-                message: 'This is a test notification!'
+        if (Notification.permission === 'granted') {
+            new Notification('Test SMS', {
+                body: 'This is a test notification from SMS Webhook Dashboard',
+                icon: '/icon-192.png'
             });
         } else {
             alert('Please enable notifications first.');
@@ -71,8 +95,16 @@ export default function Dashboard() {
     };
 
     // Get notification status
-    const getNotificationStatus = () => {
-        if (!isSupported) {
+    const getStatus = () => {
+        if (!notificationStatus) {
+            return {
+                message: 'Loading notification status...',
+                bgColor: 'bg-gray-100',
+                textColor: 'text-gray-800',
+                icon: '⏳'
+            };
+        }
+        if (!notificationStatus.supported) {
             return {
                 message: 'Push notifications are not supported in this browser',
                 bgColor: 'bg-gray-100',
@@ -80,20 +112,24 @@ export default function Dashboard() {
                 icon: 'ℹ️'
             };
         }
-        if (permission === 'default') {
+        if (notificationStatus.permission === 'default') {
             return {
-                message: 'Enable push notifications to receive alerts for new SMS messages',
-                bgColor: 'bg-yellow-50',
-                textColor: 'text-yellow-800',
-                icon: '🔔'
+                message: subscribed
+                    ? '✓ Notifications enabled - you will receive alerts for new SMS messages'
+                    : 'Enable push notifications to receive alerts for new SMS messages',
+                bgColor: subscribed ? 'bg-green-50' : 'bg-yellow-50',
+                textColor: subscribed ? 'text-green-800' : 'text-yellow-800',
+                icon: subscribed ? '✓' : '🔔'
             };
         }
-        if (permission === 'granted') {
+        if (notificationStatus.permission === 'granted') {
             return {
-                message: '✓ Notifications are enabled - you will receive alerts for new SMS messages',
+                message: subscribed
+                    ? '✓ Notifications are enabled - you will receive alerts for new SMS messages'
+                    : 'Notifications are enabled but not subscribed to server push',
                 bgColor: 'bg-green-50',
                 textColor: 'text-green-800',
-                icon: '✓'
+                icon: subscribed ? '✓' : '✓'
             };
         }
         return {
@@ -104,16 +140,16 @@ export default function Dashboard() {
         };
     };
 
-    const notificationStatus = getNotificationStatus();
+    const status = getStatus();
 
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 {/* Notification Status Announcement */}
-                <div className={`mb-6 p-4 rounded-lg border ${notificationStatus.bgColor} ${notificationStatus.textColor}`}>
+                <div className={`mb-6 p-4 rounded-lg border ${status.bgColor} ${status.textColor}`}>
                     <div className="flex items-center gap-2">
-                        <span className="text-xl">{notificationStatus.icon}</span>
-                        <p className="text-sm sm:text-base">{notificationStatus.message}</p>
+                        <span className="text-xl">{status.icon}</span>
+                        <p className="text-sm sm:text-base">{status.message}</p>
                     </div>
                 </div>
 
@@ -136,16 +172,16 @@ export default function Dashboard() {
                             {loading ? 'Loading...' : 'Refresh'}
                         </button>
 
-                        {isSupported && permission === 'default' && (
+                        {notificationStatus?.supported && notificationStatus.permission === 'default' && (
                             <button
-                                onClick={handleNotificationPermission}
+                                onClick={handleEnableNotifications}
                                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base whitespace-nowrap"
                             >
                                 Enable Notifications
                             </button>
                         )}
 
-                        {isSupported && permission === 'granted' && (
+                        {notificationStatus?.supported && notificationStatus.permission === 'granted' && (
                             <button
                                 onClick={handleSendTestNotification}
                                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base whitespace-nowrap"

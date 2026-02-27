@@ -36,26 +36,53 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
-// Handle push notifications
+// Handle push notifications from server
 self.addEventListener('push', (event) => {
-    const data = event.data?.json() || { title: 'New SMS', body: 'You have a new message' };
+    console.log('Push event received:', event);
+
+    let data = { title: 'New SMS', body: 'You have a new message' };
+
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data = {
+                title: 'New SMS',
+                body: event.data.text()
+            };
+        }
+    }
+
     const options = {
-        body: data.message || data.body,
+        body: data.body,
         icon: '/icon-192.png',
         badge: '/icon-192.png',
+        vibrate: [100, 50, 100],
         data: {
-            url: '/#message=' + data.id
-        }
+            url: data.data?.url || '/',
+            dateOfArrival: Date.now(),
+            primaryKey: '1'
+        },
+        actions: [
+            { action: 'open', title: 'Open' },
+            { action: 'close', title: 'Close' }
+        ]
     };
 
     event.waitUntil(
-        self.registration.showNotification(data.subject || data.title, options)
+        self.registration.showNotification(data.title, options)
     );
 });
 
 // Handle notification click
 self.addEventListener('notificationclick', (event) => {
+    console.log('Notification click:', event);
     event.notification.close();
+
+    if (event.action === 'close') {
+        return;
+    }
+
     event.waitUntil(
         clients.matchAll({ type: 'window' }).then((clientList) => {
             // Focus existing window or open new one
