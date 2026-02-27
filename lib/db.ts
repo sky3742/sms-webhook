@@ -1,56 +1,68 @@
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import * as schema from './schema';
+import { messages } from './schema';
 
 const dbPath = process.env.TURSO_DATABASE_URL || 'file:sms.db';
+const dbToken = process.env.TURSO_AUTH_TOKEN;
 
 // Initialize Turso/SQLite client
 const client = createClient({
-    url: dbPath
+    url: dbPath,
+    authToken: dbToken
 });
 
 // Initialize Drizzle ORM
-export const db = drizzle(client, { schema });
+export const db = drizzle(client);
 
 // Database schema type exports
-export type Message = typeof schema.messages.$inferSelect;
-export type NewMessage = typeof schema.messages.$inferInsert;
+export type Message = typeof messages.$inferSelect;
+export type NewMessage = typeof messages.$inferInsert;
 
-// Helper functions using Drizzle
-export async function addMessage(subject: string, message: string) {
-    const newMessage = await db.insert(schema.messages).values({
-        subject,
-        message,
-        createdAt: Date.now()
-    }).returning();
+// Helper functions using raw SQL for compatibility
+export async function addMessage(subject: string, messageText: string) {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const result = await client.execute({
+        sql: 'INSERT INTO messages (subject, message, created_at) VALUES (?, ?, ?)',
+        args: [subject, messageText, timestamp]
+    });
 
-    return newMessage[0];
+    // Get the inserted row
+    const inserted = await client.execute({
+        sql: 'SELECT * FROM messages WHERE id = ?',
+        args: [result.lastInsertRowid]
+    });
+
+    return inserted.rows[0];
 }
 
 export async function getMessageById(id: number) {
-    const result = await db.select().from(schema.messages).where(
-        // @ts-ignore - SQLite specific
-        schema.messages.id.equals(id)
-    );
-    return result[0];
+    const result = await client.execute({
+        sql: 'SELECT * FROM messages WHERE id = ?',
+        args: [id]
+    });
+    return result.rows[0];
 }
 
 export async function getAllMessages(limit: number = 100, offset: number = 0) {
-    return await db.select().from(schema.messages)
-        .orderBy(schema.messages.createdAt)
-        .limit(limit)
-        .offset(offset);
+    const result = await client.execute({
+        sql: 'SELECT * FROM messages ORDER BY created_at DESC LIMIT ? OFFSET ?',
+        args: [limit, offset]
+    });
+    return result.rows;
 }
 
 export async function deleteMessage(id: number) {
-    const result = await db.delete(schema.messages).where(
-        // @ts-ignore - SQLite specific
-        schema.messages.id.equals(id)
-    );
+    const result = await client.execute({
+        sql: 'DELETE FROM messages WHERE id = ?',
+        args: [id]
+    });
     return result.changes > 0;
 }
 
 export async function getMessageCount() {
-    const result = await db.select({ count: schema.messages.id }).from(schema.messages);
-    return result.length;
+    const result = await client.execute({
+        sql: 'SELECT COUNT(*) as count FROM messages',
+        args: []
+    });
+    return result.rows[0]?.count || 0;
 }
