@@ -70,9 +70,53 @@ export default function Dashboard() {
         }
     };
 
+    // Get notification status
+    const getNotificationStatus = () => {
+        if (!isSupported) {
+            return {
+                message: 'Push notifications are not supported in this browser',
+                bgColor: 'bg-gray-100',
+                textColor: 'text-gray-800',
+                icon: 'ℹ️'
+            };
+        }
+        if (permission === 'default') {
+            return {
+                message: 'Enable push notifications to receive alerts for new SMS messages',
+                bgColor: 'bg-yellow-50',
+                textColor: 'text-yellow-800',
+                icon: '🔔'
+            };
+        }
+        if (permission === 'granted') {
+            return {
+                message: '✓ Notifications are enabled - you will receive alerts for new SMS messages',
+                bgColor: 'bg-green-50',
+                textColor: 'text-green-800',
+                icon: '✓'
+            };
+        }
+        return {
+            message: 'Notifications are disabled',
+            bgColor: 'bg-red-50',
+            textColor: 'text-red-800',
+            icon: '✗'
+        };
+    };
+
+    const notificationStatus = getNotificationStatus();
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                {/* Notification Status Announcement */}
+                <div className={`mb-6 p-4 rounded-lg border ${notificationStatus.bgColor} ${notificationStatus.textColor}`}>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xl">{notificationStatus.icon}</span>
+                        <p className="text-sm sm:text-base">{notificationStatus.message}</p>
+                    </div>
+                </div>
+
                 {/* Header with Refresh Button */}
                 <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex-1">
@@ -189,15 +233,6 @@ export default function Dashboard() {
                         </code>
                     </p>
                 </div>
-
-                {/* Notification Status */}
-                {isSupported && permission !== 'default' && (
-                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                        <p className="text-sm text-green-800">
-                            ✓ Notifications are {permission === 'granted' ? 'enabled' : 'disabled'}
-                        </p>
-                    </div>
-                )}
             </div>
         </div>
     );
