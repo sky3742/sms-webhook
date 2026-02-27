@@ -8,7 +8,6 @@ export default function Dashboard() {
     const [count, setCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [showNotificationBtn, setShowNotificationBtn] = useState(false);
 
     const { isSupported, permission, requestPermission, sendNotification } =
         usePushNotifications();
@@ -32,18 +31,6 @@ export default function Dashboard() {
 
     useEffect(() => {
         loadMessages();
-
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker
-                .register('/sw.js')
-                .then((registration) => {
-                    console.log('Service Worker registered:', registration);
-                })
-                .catch((error) => {
-                    console.error('Service Worker registration failed:', error);
-                });
-        }
     }, []);
 
     const handleRefresh = () => {
@@ -159,18 +146,27 @@ export default function Dashboard() {
                                             </p>
                                         </div>
 
-                                        {/* Message ID & Actions */}
-                                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                                            <div className="text-xs sm:text-sm text-gray-400">
-                                                #{msg.id}
-                                            </div>
-                                            <button
-                                                onClick={() => handleDelete(msg.id)}
-                                                className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors whitespace-nowrap"
+                                        {/* Delete Icon */}
+                                        <button
+                                            onClick={() => handleDelete(msg.id)}
+                                            className="flex-shrink-0 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            aria-label="Delete message"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-5 w-5"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
                                             >
-                                                Delete
-                                            </button>
-                                        </div>
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
                             ))}
