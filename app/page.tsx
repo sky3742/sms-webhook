@@ -144,7 +144,7 @@ export default function Dashboard() {
         if (notificationStatus.permission === 'default') {
             return {
                 message: subscribed
-                    ? '✓ Notifications enabled - you will receive alerts for new SMS messages'
+                    ? 'Notifications enabled - you will receive alerts for new SMS messages'
                     : 'Enable push notifications to receive alerts for new SMS messages',
                 bgColor: subscribed ? 'bg-green-50' : 'bg-yellow-50',
                 textColor: subscribed ? 'text-green-800' : 'text-yellow-800',
@@ -154,7 +154,7 @@ export default function Dashboard() {
         if (notificationStatus.permission === 'granted') {
             return {
                 message: subscribed
-                    ? '✓ Notifications are enabled - you will receive alerts for new SMS messages'
+                    ? 'Notifications are enabled - you will receive alerts for new SMS messages'
                     : 'Notifications are enabled but not subscribed to server push',
                 bgColor: subscribed ? 'bg-green-50' : 'bg-yellow-50',
                 textColor: subscribed ? 'text-green-800' : 'text-yellow-800',
