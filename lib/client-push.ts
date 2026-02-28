@@ -1,5 +1,7 @@
 // Client-side push notification subscription
 export async function subscribeToPushNotifications() {
+    console.log('=== Starting push notification subscription ===');
+
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         console.warn('Push notifications not supported');
         return null;
@@ -7,21 +9,27 @@ export async function subscribeToPushNotifications() {
 
     try {
         // Register service worker
+        console.log('1. Registering service worker...');
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered');
+        console.log('✅ Service Worker registered:', registration);
 
         // Convert VAPID key from base64 to Uint8Array
         const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+        console.log('2. VAPID key (first 20 chars):', vapidKey.substring(0, 20) + '...');
+
         const applicationServerKey = urlBase64ToUint8Array(vapidKey);
+        console.log('3. Uint8Array created:', applicationServerKey);
 
         // Subscribe to push notifications
+        console.log('4. Subscribing to push notifications...');
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: applicationServerKey as BufferSource
         });
-        console.log('Push subscription created');
+        console.log('✅ Push subscription created:', subscription);
 
         // Send subscription to server
+        console.log('5. Sending subscription to server...');
         const response = await fetch('/api/subscribe', {
             method: 'POST',
             headers: {
@@ -30,15 +38,18 @@ export async function subscribeToPushNotifications() {
             body: JSON.stringify(subscription)
         });
 
+        console.log('Server response status:', response.status);
+        console.log('Server response:', await response.text());
+
         if (!response.ok) {
             throw new Error('Failed to subscribe');
         }
 
-        console.log('Successfully subscribed to push notifications');
+        console.log('✅ Successfully subscribed to push notifications');
         return subscription;
 
     } catch (error) {
-        console.error('Failed to subscribe to push notifications:', error);
+        console.error('❌ Failed to subscribe to push notifications:', error);
         return null;
     }
 }
