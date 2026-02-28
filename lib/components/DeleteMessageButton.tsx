@@ -10,7 +10,7 @@ export const DeleteMessageButton = ({ id }: DeleteMessageButtonProps) => {
   return (
     <button
       onClick={() => deleteMessage(id)}
-      className="shrink-0 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+      className="shrink-0 rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50"
       aria-label="Delete message"
     >
       <svg

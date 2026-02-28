@@ -19,15 +19,5 @@ export const deleteSubscription = async (endpoint: string) => {
     .where(eq(pushSubscriptions.endpoint, endpoint));
 };
 
-export const getAllSubscriptions = async () => {
-  return await db.select().from(pushSubscriptions);
-};
-
-export const getSubscription = async (endpoint: string) => {
-  const result = await db
-    .select()
-    .from(pushSubscriptions)
-    .where(eq(pushSubscriptions.endpoint, endpoint));
-
-  return result.at(0);
-};
+export const getAllSubscriptions = async () =>
+  db.select().from(pushSubscriptions);

@@ -1,13 +1,10 @@
 "use server";
 
-// Server-side Push Notifications using Web Push API
 import webpush from "web-push";
 
-// VAPID Keys
 const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 const privateVapidKey = process.env.VAPID_PRIVATE_KEY || "";
 
-// Initialize web-push
 webpush.setVapidDetails(
   "mailto:skyblue3742@gmail.com",
   publicVapidKey,
@@ -30,9 +27,6 @@ export interface PushNotificationPayload {
   data?: unknown;
 }
 
-/**
- * Send push notification to a single subscription
- */
 export async function sendPushNotification(
   subscription: PushSubscription,
   payload: PushNotificationPayload,
@@ -50,9 +44,6 @@ export async function sendPushNotification(
   }
 }
 
-/**
- * Send push notification to multiple subscriptions
- */
 export async function sendPushNotificationToAll(
   subscriptions: PushSubscription[],
   payload: PushNotificationPayload,
@@ -69,28 +60,4 @@ export async function sendPushNotificationToAll(
   }
 
   return successCount;
-}
-
-/**
- * Send SMS webhook notification
- */
-export async function sendSmsWebhookNotification(
-  subscription: PushSubscription,
-  message: {
-    subject: string;
-    content: string;
-  },
-): Promise<void> {
-  const payload: PushNotificationPayload = {
-    title: `New SMS from ${message.subject}`,
-    body: message.content,
-    icon: "/icon-192.png",
-    badge: "/icon-192.png",
-    data: {
-      url: "/",
-      messageId: Date.now(),
-    },
-  };
-
-  await sendPushNotification(subscription, payload);
 }

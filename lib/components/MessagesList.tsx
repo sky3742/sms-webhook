@@ -1,51 +1,53 @@
+import { DeleteMessageButton } from "@/lib/components/DeleteMessageButton";
+import { messages } from "@/lib/repo/schema";
 import { InferSelectModel } from "drizzle-orm";
-import { messages } from "../repo/schema";
-import { DeleteMessageButton } from "./DeleteMessageButton";
 
 type MessagesListProps = {
   messages: Array<InferSelectModel<typeof messages>>;
 };
 
+const EmptyMessageState = () => (
+  <div className="p-8 text-center text-sm text-gray-500 sm:text-base">
+    No messages received yet
+  </div>
+);
+
+const MessageItem = ({
+  id,
+  subject,
+  message,
+  createdAt,
+}: InferSelectModel<typeof messages>) => (
+  <div className="p-4 hover:bg-gray-50 sm:p-6">
+    <div className="flex items-start justify-between gap-3 sm:gap-4">
+      <div className="min-w-0 flex-1">
+        <h2 className="truncate text-base font-semibold text-gray-900 sm:text-lg">
+          {subject || "No subject"}
+        </h2>
+
+        <p className="mt-1 text-sm break-words whitespace-pre-wrap text-gray-700 sm:mt-2 sm:text-base">
+          {message}
+        </p>
+
+        <p className="mt-1 text-xs text-gray-500 sm:mt-3 sm:text-sm">
+          Received at: {new Date(createdAt * 1000).toLocaleString()}
+        </p>
+      </div>
+
+      <DeleteMessageButton id={id} />
+    </div>
+  </div>
+);
+
 export const MessagesList = ({ messages }: MessagesListProps) => {
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      {/* {error && (
-        <div className="p-4 text-center text-red-500 text-sm sm:text-base">
-          Error: {error}
-        </div>
-      )} */}
-
+    <div className="overflow-hidden rounded-lg bg-white shadow">
       {messages.length === 0 ? (
-        <div className="p-8 text-center text-gray-500 text-sm sm:text-base">
-          No messages received yet
-        </div>
+        <EmptyMessageState />
       ) : (
         <div className="divide-y divide-gray-200">
-          {messages.map((msg) => (
-            <div key={msg.id} className="p-4 sm:p-6 hover:bg-gray-50">
-              <div className="flex items-start justify-between gap-3 sm:gap-4">
-                <div className="flex-1 min-w-0">
-                  {/* Subject */}
-                  <h2 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
-                    {msg.subject || "No subject"}
-                  </h2>
-
-                  {/* Message */}
-                  <p className="text-sm sm:text-base text-gray-700 mt-1 sm:mt-2 whitespace-pre-wrap wrap-break-word">
-                    {msg.message}
-                  </p>
-
-                  {/* Timestamp */}
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-3">
-                    Received at:{" "}
-                    {new Date(msg.createdAt * 1000).toLocaleString()}
-                  </p>
-                </div>
-
-                {/* Delete Icon */}
-                <DeleteMessageButton id={msg.id} />
-              </div>
-            </div>
+          {messages.map((message) => (
+            <MessageItem key={message.id} {...message} />
           ))}
         </div>
       )}

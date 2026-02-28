@@ -1,15 +1,21 @@
 import { useNotificationStatus } from "@/lib/stores/notification";
+import { subscribeToPushNotifications } from "@/lib/utils/client-push";
 import { useCallback, useEffect } from "react";
-import { subscribeToPushNotifications } from "./client-push";
 
 export const usePushNotifications = () => {
   const { permission, subscribed, setIsLoading, setStatus, setSubscribed } =
     useNotificationStatus();
 
-  const subscibe = useCallback(async () => {
-    if (permission === "granted" && !subscribed) {
+  const subscribeIfNeeded = useCallback(async () => {
+    if (permission !== "granted" || subscribed) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
       const subscription = await subscribeToPushNotifications();
-      setSubscribed(!!subscription);
+      setSubscribed(Boolean(subscription));
+    } finally {
       setIsLoading(false);
     }
   }, [permission, subscribed, setIsLoading, setSubscribed]);
@@ -17,22 +23,33 @@ export const usePushNotifications = () => {
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       setStatus("unsupported");
-    } else {
-      setStatus(Notification.permission);
+      setIsLoading(false);
+      return;
     }
-  }, [setStatus]);
+
+    setStatus(Notification.permission);
+    setIsLoading(false);
+  }, [setStatus, setIsLoading]);
 
   useEffect(() => {
-    subscibe();
-  }, [subscibe]);
+    void subscribeIfNeeded();
+  }, [subscribeIfNeeded]);
 
   const handleEnableNotifications = async () => {
+    if (permission !== "default") {
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      if (permission === "default") {
-        await Notification.requestPermission();
+      const nextPermission = await Notification.requestPermission();
+      setStatus(nextPermission);
+      if (nextPermission !== "granted") {
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Failed to enable notifications:", error);
+      setIsLoading(false);
     }
   };
 

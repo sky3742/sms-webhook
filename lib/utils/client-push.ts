@@ -1,13 +1,13 @@
-import {
-  deleteSubscription,
-  saveSubscription,
-} from "@/lib/services/pushSubscription";
+import { saveSubscription } from "@/lib/services/pushSubscription";
 
 // Client-side push notification subscription
 export async function subscribeToPushNotifications() {
   try {
     const registration = await navigator.serviceWorker.register("/sw.js");
     const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+    if (!vapidKey) {
+      throw new Error("NEXT_PUBLIC_VAPID_PUBLIC_KEY is missing");
+    }
     const applicationServerKey = urlBase64ToUint8Array(vapidKey);
 
     // Subscribe to push notifications
@@ -27,30 +27,8 @@ export async function subscribeToPushNotifications() {
 
     return subscription;
   } catch (error) {
-    console.error("❌ Failed to subscribe to push notifications:", error);
+    console.error("Failed to subscribe to push notifications:", error);
     return null;
-  }
-}
-
-/**
- * Unsubscribe from push notifications
- */
-export async function unsubscribeFromPushNotifications() {
-  if (!("serviceWorker" in navigator)) {
-    return;
-  }
-
-  try {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-
-    if (subscription) {
-      await subscription.unsubscribe();
-      await deleteSubscription(subscription.endpoint);
-      console.log("Successfully unsubscribed from push notifications");
-    }
-  } catch (error) {
-    console.error("Failed to unsubscribe:", error);
   }
 }
 

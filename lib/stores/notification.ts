@@ -2,8 +2,8 @@ import { create } from "zustand";
 
 type Permission = NotificationPermission | "unsupported";
 
-type INotificationStatus = {
-  supported?: boolean;
+type NotificationStatusStore = {
+  supported: boolean;
   permission: Permission;
   subscribed: boolean;
   loading: boolean;
@@ -12,7 +12,8 @@ type INotificationStatus = {
   setIsLoading: (loading: boolean) => void;
 };
 
-export const useNotificationStatus = create<INotificationStatus>((set) => ({
+export const useNotificationStatus = create<NotificationStatusStore>((set) => ({
+  supported: false,
   subscribed: false,
   loading: true,
   permission: "unsupported",

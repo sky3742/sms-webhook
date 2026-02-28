@@ -21,11 +21,6 @@ export async function addMessage(subject: string, messageText: string) {
   return result.at(0)!;
 }
 
-export async function getMessageById(id: number) {
-  const result = await db.select().from(messages).where(eq(messages.id, id));
-  return result.at(0);
-}
-
 export async function getAllMessages(limit: number = 100, offset: number = 0) {
   const result = await db
     .select()
@@ -43,6 +38,5 @@ export async function deleteMessage(id: number) {
 }
 
 export async function getMessageCount() {
-  const result = await db.$count(messages);
-  return result;
+  return db.$count(messages);
 }

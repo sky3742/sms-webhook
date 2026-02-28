@@ -7,11 +7,8 @@ export interface SmsForwarderMessage {
 }
 
 export interface ParsedSmsMessage {
-  id: number;
-  sender: string; // Phone number or sender name
+  sender: string;
   content: string;
-  timestamp: number;
-  raw: SmsForwarderMessage;
 }
 
 /**
@@ -95,11 +92,8 @@ export function parseSmsMessage(
     .trim();
 
   return {
-    id: Date.now(),
     sender: sender || "Unknown Sender",
-    content: content,
-    timestamp: Date.now(),
-    raw: message,
+    content,
   };
 }
 
@@ -119,6 +113,5 @@ export function formatPhoneNumber(phoneNumber: string): string {
     return phoneNumber;
   }
 
-  // Return with + prefix - simple formatting
   return "+" + cleaned;
 }
