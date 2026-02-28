@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier . --write",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",
@@ -15,7 +18,8 @@
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -26,6 +30,8 @@
     "drizzle-kit": "^0.31.9",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "prettier": "3.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

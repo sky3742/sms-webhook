@@ -1,17 +1,17 @@
 {
-    "name": "SMS Webhook Dashboard",
-    "short_name": "SMS Dashboard",
-    "description": "Monitor SMS messages via webhook",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#f9fafb",
-    "theme_color": "#2563eb",
-    "icons": [
-        {
-            "src": "/icon.svg",
-            "sizes": "any",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
-        }
-    ]
+  "name": "SMS Webhook Dashboard",
+  "short_name": "SMS Dashboard",
+  "description": "Monitor SMS messages via webhook",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
