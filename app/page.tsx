@@ -10,6 +10,7 @@ export default function Dashboard() {
     const [error, setError] = useState<string | null>(null);
     const [notificationStatus, setNotificationStatus] = useState<any>(null);
     const [subscribed, setSubscribed] = useState(false);
+    const [isSubscribing, setIsSubscribing] = useState(false);
 
     const loadMessages = async () => {
         try {
@@ -35,6 +36,9 @@ export default function Dashboard() {
         const status = getNotificationStatus();
         setNotificationStatus(status);
 
+        // Check if already subscribed
+        checkExistingSubscription();
+
         // Subscribe to push notifications
         if (status.supported && status.permission === 'default') {
             subscribeToPushNotifications()
@@ -48,6 +52,18 @@ export default function Dashboard() {
                 });
         }
     }, []);
+
+    const checkExistingSubscription = async () => {
+        try {
+            const response = await fetch('/api/subscribe');
+            if (response.ok) {
+                const data = await response.json();
+                setSubscribed(data.subscriber_count > 0);
+            }
+        } catch (error) {
+            console.error('Failed to check subscription:', error);
+        }
+    };
 
     const handleRefresh = () => {
         loadMessages();
@@ -66,6 +82,10 @@ export default function Dashboard() {
     };
 
     const handleEnableNotifications = async () => {
+        if (isSubscribing) return;
+
+        setIsSubscribing(true);
+
         try {
             // Request notification permission
             if (Notification.permission === 'default') {
@@ -77,9 +97,18 @@ export default function Dashboard() {
                         setSubscribed(true);
                     }
                 }
+            } else if (Notification.permission === 'granted') {
+                // Already granted, just check subscription
+                const response = await fetch('/api/subscribe');
+                if (response.ok) {
+                    const data = await response.json();
+                    setSubscribed(data.subscriber_count > 0);
+                }
             }
         } catch (error) {
             console.error('Failed to enable notifications:', error);
+        } finally {
+            setIsSubscribing(false);
         }
     };
 
@@ -127,9 +156,9 @@ export default function Dashboard() {
                 message: subscribed
                     ? '✓ Notifications are enabled - you will receive alerts for new SMS messages'
                     : 'Notifications are enabled but not subscribed to server push',
-                bgColor: 'bg-green-50',
-                textColor: 'text-green-800',
-                icon: subscribed ? '✓' : '✓'
+                bgColor: subscribed ? 'bg-green-50' : 'bg-yellow-50',
+                textColor: subscribed ? 'text-green-800' : 'text-yellow-800',
+                icon: subscribed ? '✓' : '🔔'
             };
         }
         return {
@@ -175,9 +204,10 @@ export default function Dashboard() {
                         {notificationStatus?.supported && notificationStatus.permission === 'default' && (
                             <button
                                 onClick={handleEnableNotifications}
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base whitespace-nowrap"
+                                disabled={isSubscribing}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Enable Notifications
+                                {isSubscribing ? 'Subscribing...' : 'Enable Notifications'}
                             </button>
                         )}
 
