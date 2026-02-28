@@ -30,10 +30,11 @@ export default function Dashboard() {
     };
 
     useEffect(() => {
-        loadMessages();
+        console.log('=== Dashboard mounted, checking notification status ===');
 
         // Check notification status
         const status = getNotificationStatus();
+        console.log('Notification status:', status);
         setNotificationStatus(status);
 
         // Check if already subscribed
@@ -41,24 +42,36 @@ export default function Dashboard() {
 
         // Subscribe to push notifications
         if (status.supported && status.permission === 'default') {
+            console.log('Permission is default, subscribing...');
             subscribeToPushNotifications()
                 .then((subscription) => {
+                    console.log('Subscription result:', subscription);
                     if (subscription) {
                         setSubscribed(true);
+                        console.log('Set subscribed to true');
                     }
                 })
                 .catch((error) => {
                     console.error('Failed to subscribe:', error);
                 });
+        } else {
+            console.log('Permission is not default:', status.permission);
         }
     }, []);
 
     const checkExistingSubscription = async () => {
         try {
+            console.log('Checking existing subscription...');
             const response = await fetch('/api/subscribe');
+            console.log('Response status:', response.status);
+
             if (response.ok) {
                 const data = await response.json();
+                console.log('Subscription data:', data);
                 setSubscribed(data.subscriber_count > 0);
+                console.log('Set subscribed to:', data.subscriber_count > 0);
+            } else {
+                console.error('Failed to check subscription, status:', response.status);
             }
         } catch (error) {
             console.error('Failed to check subscription:', error);
@@ -89,20 +102,28 @@ export default function Dashboard() {
         try {
             // Request notification permission
             if (Notification.permission === 'default') {
+                console.log('Requesting notification permission...');
                 const permission = await Notification.requestPermission();
+                console.log('Permission granted:', permission);
+
                 if (permission === 'granted') {
+                    console.log('Permission granted, subscribing...');
                     // Subscribe to push notifications
                     const subscription = await subscribeToPushNotifications();
+                    console.log('Subscription result:', subscription);
                     if (subscription) {
                         setSubscribed(true);
+                        console.log('Set subscribed to true');
                     }
                 }
             } else if (Notification.permission === 'granted') {
+                console.log('Permission already granted, checking subscription...');
                 // Already granted, just check subscription
                 const response = await fetch('/api/subscribe');
                 if (response.ok) {
                     const data = await response.json();
                     setSubscribed(data.subscriber_count > 0);
+                    console.log('Set subscribed to:', data.subscriber_count > 0);
                 }
             }
         } catch (error) {
@@ -144,7 +165,7 @@ export default function Dashboard() {
         if (notificationStatus.permission === 'default') {
             return {
                 message: subscribed
-                    ? 'Notifications enabled - you will receive alerts for new SMS messages'
+                    ? '✓ Notifications enabled - you will receive alerts for new SMS messages'
                     : 'Enable push notifications to receive alerts for new SMS messages',
                 bgColor: subscribed ? 'bg-green-50' : 'bg-yellow-50',
                 textColor: subscribed ? 'text-green-800' : 'text-yellow-800',
@@ -154,7 +175,7 @@ export default function Dashboard() {
         if (notificationStatus.permission === 'granted') {
             return {
                 message: subscribed
-                    ? 'Notifications are enabled - you will receive alerts for new SMS messages'
+                    ? '✓ Notifications are enabled - you will receive alerts for new SMS messages'
                     : 'Notifications are enabled but not subscribed to server push',
                 bgColor: subscribed ? 'bg-green-50' : 'bg-yellow-50',
                 textColor: subscribed ? 'text-green-800' : 'text-yellow-800',
