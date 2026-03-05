@@ -9,6 +9,7 @@ export interface SmsForwarderMessage {
 export interface ParsedSmsMessage {
   sender: string;
   content: string;
+  token?: string;
 }
 
 /**
@@ -21,79 +22,93 @@ function extractPhoneDigits(text: string): string {
   return digits;
 }
 
-/**
- * Parse SMS Forwarder message
- * SMS Forwarder format:
- * - subject: "You have a new SMS at the number SIM 2"
- * - message: "Incoming - +1234567890 (Contact undefined) <br/>Message: Actual SMS content (2/27/26 6:36 PM)"
- *
- * @param message Raw message from SMS Forwarder webhook
- * @returns Parsed message with sender as title
- */
-export function parseSmsMessage(
-  message: SmsForwarderMessage,
-): ParsedSmsMessage {
-  // Extract phone number from message field
-  let sender = "";
+function parseSubjectKv(subject: string): Record<string, string> {
+  const entries = subject
+    .split("|")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const [key, ...rest] = part.split("=");
+      return [key?.trim().toLowerCase(), rest.join("=").trim()] as const;
+    })
+    .filter(([key, value]) => key && value);
 
-  // First, remove HTML tags to get clean text
-  const cleanMessage = message.message.replace(/<br\s*\/?>/gi, " ");
+  return Object.fromEntries(entries);
+}
 
-  // Remove spaces and duplicate plus signs for phone extraction
-  // e.g., "++12 345 67890" -> "+1234567890"
-  const noSpaces = cleanMessage.replace(/\s/g, "");
-  const noDoublePlus = noSpaces.replace(/\+\+/g, "+");
+function normalizeContent(input: string): string {
+  return input.replace(/<br\s*\/?>/gi, "\n").trim();
+}
 
-  // Look for phone pattern after "Incoming-" in the cleaned version
-  const phoneMatch = noDoublePlus.match(/Incoming-[\+]?(\d{8,15})/);
-
-  if (phoneMatch && phoneMatch[1]) {
-    const digits = extractPhoneDigits(phoneMatch[1]);
-    // Need at least 8 digits for a valid phone number
-    if (digits.length >= 8) {
-      sender = "+" + digits;
-    }
-  }
-
-  // If no phone in message, try to find any phone-like pattern in the original message
-  if (!sender) {
-    // Look for any 8-15 digit sequence in the clean message
-    const anyPhoneMatch = cleanMessage.match(/(\d{8,15})/);
-    if (anyPhoneMatch) {
-      sender = "+" + anyPhoneMatch[1];
-    }
-  }
-
-  // If still no phone, try subject
-  if (!sender) {
-    const subjectDigits = extractPhoneDigits(message.subject);
-    if (subjectDigits.length >= 8) {
-      sender = "+" + subjectDigits;
-    } else {
-      sender = message.subject;
-    }
-  }
-
-  // Extract actual SMS content from message field
-  // Format: "... <br/>Message: Actual content (2/27/26 6:36 PM)"
-  const contentMatch = message.message.match(
+function parseLegacyContent(input: string): string {
+  const contentMatch = input.match(
     /<br\s*\/?>\s*Message:\s*(.+?)(?:\s*\(\d{1,2}\/\d{1,2}\/\d{2}\s+\d{1,2}:\d{2}\s*[AP]M\)|$)/i,
   );
 
-  // Get actual message content
-  let content = contentMatch ? contentMatch[1] : message.message;
+  const content = contentMatch ? contentMatch[1] : input;
+  return normalizeContent(content).replace(
+    /\s*\(\d{1,2}\/\d{1,2}\/\d{2}\s+\d{1,2}:\d{2}\s*[AP]M\)\s*$/i,
+    "",
+  );
+}
 
-  // Clean up HTML line breaks
-  content = content.replace(/<br\s*\/?>/gi, "\n").trim();
+/**
+ * Preferred template format (subject):
+ * sender=%s|token=YOUR_STATIC_TOKEN
+ *
+ * Message:
+ * %m
+ *
+ * Falls back to previous SMS Forwarder formats for compatibility.
+ */
+export function parseSmsMessage(body: SmsForwarderMessage): ParsedSmsMessage {
+  const subject = String(body.subject || "").trim();
+  const rawMessage = String(body.message || "");
+  const message = normalizeContent(rawMessage);
 
-  // Remove trailing date/time pattern like "(2/27/26 6:36 PM)"
-  content = content
-    .replace(/\s*\(\d{1,2}\/\d{1,2}\/\d{2}\s+\d{1,2}:\d{2}\s*[AP]M\)\s*$/i, "")
-    .trim();
+  // Fast path for simple templates.
+  const subjectFields = parseSubjectKv(subject);
+  const templateSender = subjectFields.sender || subjectFields.s;
+  const templateToken = subjectFields.token;
+
+  if (templateSender || templateToken) {
+    return {
+      sender: templateSender || subject || "Unknown Sender",
+      content: message,
+      token: templateToken,
+    };
+  }
+
+  // Secondary compact format: "<sender>|<token>"
+  const compactMatch = subject.match(/^(.+?)\|([^|]+)$/);
+  if (compactMatch) {
+    return {
+      sender: compactMatch[1].trim(),
+      content: message,
+      token: compactMatch[2].trim(),
+    };
+  }
+
+  // Backward-compatible legacy parsing.
+  const cleanMessage = rawMessage.replace(/<br\s*\/?>/gi, " ");
+  const phoneMatch = cleanMessage
+    .replace(/\s/g, "")
+    .replace(/\+\+/g, "+")
+    .match(/Incoming-[\+]?(\d{8,15})/);
+
+  let sender = subject;
+  if (phoneMatch?.[1]) {
+    sender = "+" + extractPhoneDigits(phoneMatch[1]);
+  } else {
+    const subjectDigits = extractPhoneDigits(subject);
+    if (subjectDigits.length >= 8) {
+      sender = "+" + subjectDigits;
+    }
+  }
 
   return {
     sender: sender || "Unknown Sender",
-    content,
+    content: parseLegacyContent(rawMessage).trim(),
   };
 }
 

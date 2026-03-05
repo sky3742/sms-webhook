@@ -18,6 +18,12 @@ export async function POST(request: NextRequest) {
 
     // Parse message using SMS Forwarder parser
     const parsed = parseSmsMessage(body);
+    const configuredToken = process.env.WEBHOOK_AUTH_TOKEN;
+
+    if (configuredToken && parsed.token !== configuredToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const formattedSender = formatPhoneNumber(parsed.sender);
 
     // Save message to database with formatted phone number
