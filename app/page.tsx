@@ -1,11 +1,20 @@
 import { ApiEndpointInfo } from "@/lib/components/ApiEndpointInfo";
+import { LogoutButton } from "@/lib/components/LogoutButton";
 import { MessagesList } from "@/lib/components/MessagesList";
 import { NotificationButton } from "@/lib/components/NotificationButton";
 import { NotificationStatusAnnouncement } from "@/lib/components/NotificationStatusAnnouncement";
 import { RefreshButton } from "@/lib/components/RefreshButton";
+import { getSession } from "@/lib/services/auth";
 import { getAllMessages, getMessageCount } from "@/lib/services/message";
+import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
+  const session = await getSession();
+
+  if (!session) {
+    redirect("/login");
+  }
+
   const [messages, count] = await Promise.all([
     getAllMessages(50),
     getMessageCount(),
@@ -29,6 +38,7 @@ export default async function Dashboard() {
           <div className="flex flex-wrap gap-2">
             <RefreshButton />
             <NotificationButton />
+            <LogoutButton />
           </div>
         </div>
 
