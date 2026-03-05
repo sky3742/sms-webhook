@@ -17,16 +17,38 @@ A Next.js application that receives SMS messages via webhook and displays them i
 npm install
 ```
 
-2. **Run the development server**:
+2. **Configure environment variables**:
+
+```bash
+cp .env.example .env
+```
+
+Required auth/security variables:
+
+- `BETTER_AUTH_SECRET`
+- `AUTH_ADMIN_EMAIL`
+- `AUTH_ADMIN_PASSWORD`
+
+Optional:
+
+- `WEBHOOK_AUTH_TOKEN` (recommended for anti-spam/fake SMS protection)
+
+3. **Run database migrations**:
+
+```bash
+npm run db:migrate
+```
+
+4. **Run the development server**:
 
 ```bash
 npm run dev
 ```
 
-3. **Open in browser**:
+5. **Open in browser**:
 
 ```
-http://localhost:3000
+http://localhost:3000/login
 ```
 
 ## SMS Forwarder Configuration
@@ -39,9 +61,18 @@ Set the webhook URL in SMS Forwarder to:
 http://your-server-ip:3000/api/webhook
 ```
 
-### Message Format
+### Template Recommendation
 
-SMS Forwarder sends POST requests with JSON:
+Use these templates in SMS Forwarder:
+
+- Subject: `sender=%s|token=YOUR_STATIC_TOKEN`
+- Message: `%m`
+
+This keeps parsing simple and allows token verification.
+
+### Message Payload
+
+SMS Forwarder will send POST requests as JSON:
 
 ```json
 {
@@ -72,7 +103,7 @@ Receive SMS messages from SMS Forwarder.
 
 ```json
 {
-  "subject": "string",
+  "subject": "sender=+1234567890|token=YOUR_STATIC_TOKEN",
   "message": "string"
 }
 ```
@@ -103,7 +134,11 @@ Health check endpoint.
 
 ### GET / (Dashboard)
 
-View all received messages.
+View all received messages (authenticated users only).
+
+### /api/auth/\*
+
+Better Auth endpoints used for session authentication.
 
 ## Database
 
@@ -166,8 +201,9 @@ Example: `https://your-app.vercel.app/api/webhook`
 ## Security Notes
 
 1. **HTTPS**: Use HTTPS in production for secure webhook delivery
-2. **Authentication**: Consider adding API key authentication to the webhook endpoint
-3. **Rate Limiting**: Implement rate limiting to prevent abuse
+2. **Dashboard Auth**: Better Auth protects the dashboard and delete actions
+3. **Webhook Token (Optional)**: Set `WEBHOOK_AUTH_TOKEN` and include it in subject template (`token=...`) to block fake SMS submissions
+4. **Rate Limiting**: Implement rate limiting to reduce abuse and spam records
 
 ## Troubleshooting
 
