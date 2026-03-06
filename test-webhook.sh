@@ -6,17 +6,22 @@ echo "Testing SMS Forwarder webhook endpoint..."
 echo ""
 
 # Test with example payload
-subject="+1234567890"
 if [ -n "$WEBHOOK_AUTH_TOKEN" ]; then
-  subject="sender=+1234567890|token=$WEBHOOK_AUTH_TOKEN"
+  curl -X POST http://localhost:3000/api/webhook \
+    -H "Content-Type: application/json" \
+    -H "X-Webhook-Token: $WEBHOOK_AUTH_TOKEN" \
+    -d '{
+      "sender": "+1234567890",
+      "message": "This is a test message from SMS Forwarder"
+    }'
+else
+  curl -X POST http://localhost:3000/api/webhook \
+    -H "Content-Type: application/json" \
+    -d '{
+      "sender": "+1234567890",
+      "message": "This is a test message from SMS Forwarder"
+    }'
 fi
-
-curl -X POST http://localhost:3000/api/webhook \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"subject\": \"$subject\",
-    \"message\": \"This is a test message from SMS Forwarder\"
-  }"
 
 echo ""
 echo ""

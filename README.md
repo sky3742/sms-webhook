@@ -61,25 +61,24 @@ Set the webhook URL in SMS Forwarder to:
 http://your-server-ip:3000/api/webhook
 ```
 
-### Template Recommendation
+### Forwarder Payload Contract
 
-Use these templates in SMS Forwarder:
-
-- Subject: `sender=%s|token=YOUR_STATIC_TOKEN`
-- Message: `%m`
-
-This keeps parsing simple and allows token verification.
-
-### Message Payload
-
-SMS Forwarder will send POST requests as JSON:
+Because the forwarder is custom and under your control, the webhook expects a
+strict payload:
 
 ```json
 {
-  "subject": "sender name or phone number",
-  "message": "SMS content"
+  "sender": "+1234567890",
+  "message": "SMS content",
+  "token": "optional-token"
 }
 ```
+
+Recommended auth:
+
+- Put token in header: `X-Webhook-Token: <token>`
+- Or send `Authorization: Bearer <token>`
+- Body `token` is also accepted for compatibility
 
 ### Response
 
@@ -103,7 +102,7 @@ Receive SMS messages from SMS Forwarder.
 
 ```json
 {
-  "subject": "sender=+1234567890|token=YOUR_STATIC_TOKEN",
+  "sender": "+1234567890",
   "message": "string"
 }
 ```
@@ -202,7 +201,7 @@ Example: `https://your-app.vercel.app/api/webhook`
 
 1. **HTTPS**: Use HTTPS in production for secure webhook delivery
 2. **Dashboard Auth**: Better Auth protects the dashboard and delete actions
-3. **Webhook Token (Optional)**: Set `WEBHOOK_AUTH_TOKEN` and include it in subject template (`token=...`) to block fake SMS submissions
+3. **Webhook Token (Optional)**: Set `WEBHOOK_AUTH_TOKEN` and send it via `X-Webhook-Token` or `Authorization: Bearer ...`
 4. **Rate Limiting**: Implement rate limiting to reduce abuse and spam records
 
 ## Troubleshooting

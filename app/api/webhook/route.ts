@@ -1,33 +1,53 @@
 import { addMessage, getMessageCount } from "@/lib/services/message";
 import { getAllSubscriptions } from "@/lib/services/pushSubscription";
 import { sendPushNotificationToAll } from "@/lib/services/webPush";
-import { formatPhoneNumber, parseSmsMessage } from "@/lib/utils/sms-parser";
 import { NextRequest, NextResponse } from "next/server";
+
+type WebhookPayload = {
+  sender?: unknown;
+  message?: unknown;
+  token?: unknown;
+};
+
+function normalizeSender(sender: string): string {
+  const digits = sender.replace(/\D/g, "");
+  if (!digits) {
+    return sender.trim();
+  }
+  return `+${digits}`;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as WebhookPayload;
+    const configuredToken = process.env.WEBHOOK_AUTH_TOKEN;
+    const headerToken =
+      request.headers.get("x-webhook-token") ||
+      request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    const payloadToken =
+      typeof body.token === "string" ? body.token.trim() : undefined;
+    const providedToken = headerToken || payloadToken;
 
-    // Validate required fields
-    if (!body.subject || !body.message) {
+    if (configuredToken && providedToken !== configuredToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (
+      typeof body.sender !== "string" ||
+      !body.sender.trim() ||
+      typeof body.message !== "string" ||
+      !body.message.trim()
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields: subject and message" },
+        { error: "Missing required fields: sender and message" },
         { status: 400 },
       );
     }
 
-    // Parse message using SMS Forwarder parser
-    const parsed = parseSmsMessage(body);
-    const configuredToken = process.env.WEBHOOK_AUTH_TOKEN;
-
-    if (configuredToken && parsed.token !== configuredToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const formattedSender = formatPhoneNumber(parsed.sender);
+    const formattedSender = normalizeSender(body.sender);
 
     // Save message to database with formatted phone number
-    const message = await addMessage(formattedSender, parsed.content);
+    const message = await addMessage(formattedSender, body.message.trim());
 
     const result = await getAllSubscriptions();
 
@@ -42,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Send push notification to all subscribers
     const payload = {
       title: `New SMS from ${formattedSender}`,
-      body: parsed.content,
+      body: body.message.trim(),
       icon: "/icon-192.png",
       badge: "/icon-192.png",
       data: {
