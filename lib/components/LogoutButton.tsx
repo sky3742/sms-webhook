@@ -14,7 +14,7 @@ export const LogoutButton = () => {
 
   return (
     <button
-      className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+      className="rounded-xl border border-[#b8cae6] bg-white/70 px-3 py-2 text-sm font-medium text-[#244163] transition hover:bg-white"
       onClick={handleLogout}
       type="button"
     >

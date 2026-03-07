@@ -36,14 +36,14 @@ export const LoginForm = () => {
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       <label
-        className="block text-sm font-medium text-gray-700"
+        className="block text-sm font-medium text-[#243f61]"
         htmlFor="email"
       >
         Email
       </label>
       <input
         autoComplete="email"
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 ring-blue-600 outline-none focus:ring-2"
+        className="w-full rounded-xl border border-[#bfd0ea] bg-white px-3 py-2 text-[#10213a] ring-[#0e5cad] outline-none focus:ring-2"
         id="email"
         name="email"
         required
@@ -51,14 +51,14 @@ export const LoginForm = () => {
       />
 
       <label
-        className="block text-sm font-medium text-gray-700"
+        className="block text-sm font-medium text-[#243f61]"
         htmlFor="password"
       >
         Password
       </label>
       <input
         autoComplete="current-password"
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 ring-blue-600 outline-none focus:ring-2"
+        className="w-full rounded-xl border border-[#bfd0ea] bg-white px-3 py-2 text-[#10213a] ring-[#0e5cad] outline-none focus:ring-2"
         id="password"
         minLength={12}
         name="password"
@@ -73,7 +73,7 @@ export const LoginForm = () => {
       ) : null}
 
       <button
-        className="w-full rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+        className="w-full rounded-xl bg-[#0e5cad] px-4 py-2 font-medium text-white shadow-[0_14px_28px_-16px_rgba(14,92,173,0.8)] transition hover:bg-[#0a4b8f] disabled:cursor-not-allowed disabled:bg-[#8ba5c7]"
         disabled={isSubmitting}
         type="submit"
       >

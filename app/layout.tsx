@@ -1,5 +1,18 @@
 import type { Metadata, Viewport } from "next";
+import { Fira_Code, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-fira-code",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "SMS Webhook Dashboard",
@@ -23,7 +36,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body
+        className={`${spaceGrotesk.variable} ${firaCode.variable} antialiased`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

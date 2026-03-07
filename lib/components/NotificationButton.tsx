@@ -30,7 +30,7 @@ const TestNotificationButton = ({ onClick }: { onClick: () => void }) => (
   <NotificationButtonBase
     onClick={onClick}
     label="Test Notification"
-    className="bg-purple-600 hover:bg-purple-700"
+    className="bg-[#0b7a75] hover:bg-[#086560]"
   />
 );
 
@@ -44,7 +44,7 @@ const EnableNotificationButton = ({
   <NotificationButtonBase
     onClick={onClick}
     label={loading ? "Subscribing..." : "Enable Notifications"}
-    className="bg-green-600 hover:bg-green-700"
+    className="bg-[#15803d] hover:bg-[#11632f]"
     disabled={loading}
   />
 );
