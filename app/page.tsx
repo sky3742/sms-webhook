@@ -1,5 +1,7 @@
-import { AutoRefreshOnRevisit } from "@/lib/components/AutoRefreshOnRevisit";
+export const dynamic = "force-dynamic";
+
 import { ApiEndpointInfo } from "@/lib/components/ApiEndpointInfo";
+import { AutoRefreshOnRevisit } from "@/lib/components/AutoRefreshOnRevisit";
 import { LogoutButton } from "@/lib/components/LogoutButton";
 import { MessagesList } from "@/lib/components/MessagesList";
 import { NotificationButton } from "@/lib/components/NotificationButton";
