@@ -24,6 +24,7 @@ export interface PushNotificationPayload {
   body: string;
   icon?: string;
   badge?: string;
+  image?: string;
   data?: unknown;
 }
 

@@ -7,7 +7,7 @@ A Next.js application that receives SMS messages via webhook and displays them i
 - **Webhook Endpoint**: Receives SMS messages from SMS Forwarder
 - **SQLite Storage**: All messages are stored in a local SQLite database
 - **Dashboard**: View all received messages with timestamps
-- **Real-time Updates**: Refresh to see new messages
+- **Real-time Updates**: Auto-refreshes when tab/window is revisited
 
 ## Setup
 
@@ -32,6 +32,8 @@ Required auth/security variables:
 Optional:
 
 - `WEBHOOK_AUTH_TOKEN` (recommended for anti-spam/fake SMS protection)
+- `PUSH_NOTIFICATION_ICON` and `PUSH_NOTIFICATION_BADGE` (icon customization)
+  - defaults: `/notification-icon.png` and `/notification-badge.png`
 
 3. **Run database migrations**:
 
@@ -202,7 +204,8 @@ Example: `https://your-app.vercel.app/api/webhook`
 1. **HTTPS**: Use HTTPS in production for secure webhook delivery
 2. **Dashboard Auth**: Better Auth protects the dashboard and delete actions
 3. **Webhook Token (Optional)**: Set `WEBHOOK_AUTH_TOKEN` and send it via `X-Webhook-Token` or `Authorization: Bearer ...`
-4. **Rate Limiting**: Implement rate limiting to reduce abuse and spam records
+4. **Push Notification Branding**: Customize `PUSH_NOTIFICATION_ICON` and `PUSH_NOTIFICATION_BADGE`
+5. **Rate Limiting**: Implement rate limiting to reduce abuse and spam records
 
 ## Troubleshooting
 

@@ -45,6 +45,10 @@ export async function POST(request: NextRequest) {
     }
 
     const formattedSender = normalizeSender(body.sender);
+    const notificationIcon =
+      process.env.PUSH_NOTIFICATION_ICON || "/notification-icon.png";
+    const notificationBadge =
+      process.env.PUSH_NOTIFICATION_BADGE || notificationIcon;
 
     // Save message to database with formatted phone number
     const message = await addMessage(formattedSender, body.message.trim());
@@ -63,8 +67,8 @@ export async function POST(request: NextRequest) {
     const payload = {
       title: `New SMS from ${formattedSender}`,
       body: body.message.trim(),
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      icon: notificationIcon,
+      badge: notificationBadge,
       data: {
         url: "/",
         messageId: message.id,

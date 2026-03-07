@@ -57,7 +57,7 @@ export const usePushNotifications = () => {
     if (permission === "granted") {
       new Notification("Test SMS", {
         body: "This is a test notification from SMS Webhook Dashboard",
-        icon: "/icon-192.png",
+        icon: "/notification-icon.png",
       });
     } else {
       alert("Please enable notifications first.");
