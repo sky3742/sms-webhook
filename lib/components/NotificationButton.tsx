@@ -20,7 +20,7 @@ const NotificationButtonBase = ({
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`rounded-lg px-4 py-2 text-sm whitespace-nowrap text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:text-base ${className}`}
+    className={`w-full py-3 bg-indigo-600 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
   >
     {label}
   </button>
@@ -30,7 +30,7 @@ const TestNotificationButton = ({ onClick }: { onClick: () => void }) => (
   <NotificationButtonBase
     onClick={onClick}
     label="Test Notification"
-    className="bg-[#0b7a75] hover:bg-[#086560]"
+    className="hover:bg-indigo-700"
   />
 );
 
@@ -44,7 +44,7 @@ const EnableNotificationButton = ({
   <NotificationButtonBase
     onClick={onClick}
     label={loading ? "Subscribing..." : "Enable Notifications"}
-    className="bg-[#15803d] hover:bg-[#11632f]"
+    className="hover:bg-indigo-700"
     disabled={loading}
   />
 );

@@ -7,9 +7,7 @@ type MessagesListProps = {
 };
 
 const EmptyMessageState = () => (
-  <div className="rounded-2xl border border-white/70 bg-white/75 p-8 text-center text-sm text-[#65748f] shadow-[0_24px_64px_-38px_rgba(16,33,58,0.4)] sm:text-base">
-    No messages received yet
-  </div>
+  <div className="py-10 text-center text-gray-500">No SMS received yet</div>
 );
 
 const MessageItem = ({
@@ -17,39 +15,38 @@ const MessageItem = ({
   subject,
   message,
   createdAt,
-}: InferSelectModel<typeof messages>) => (
-  <div className="p-4 transition hover:bg-[#f3f8ff] sm:p-6">
-    <div className="flex items-start justify-between gap-3 sm:gap-4">
-      <div className="min-w-0 flex-1">
-        <h2 className="truncate text-base font-semibold text-[#10213a] sm:text-lg">
-          {subject || "No subject"}
-        </h2>
+}: InferSelectModel<typeof messages>) => {
+  const timestamp = new Date(createdAt * 1000).toLocaleString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
-        <p className="mt-1 text-sm break-words whitespace-pre-wrap text-[#3f4e66] sm:mt-2 sm:text-base">
-          {message}
+  return (
+    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <p className="truncate font-semibold text-gray-800">
+          📩 {subject || "Unknown Sender"}
         </p>
-
-        <p className="mt-2 text-xs text-[#7a879e] sm:mt-3 sm:text-sm">
-          Received at: {new Date(createdAt * 1000).toLocaleString()}
-        </p>
+        <DeleteMessageButton id={id} />
       </div>
 
-      <DeleteMessageButton id={id} />
+      <p className="mt-2 text-sm text-gray-700">{message}</p>
+
+      <p className="mt-3 text-xs text-gray-400">{timestamp}</p>
     </div>
-  </div>
-);
+  );
+};
 
 export const MessagesList = ({ messages }: MessagesListProps) => {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/70 bg-white/80 shadow-[0_24px_64px_-38px_rgba(16,33,58,0.4)] backdrop-blur">
+    <div className="space-y-4">
       {messages.length === 0 ? (
         <EmptyMessageState />
       ) : (
-        <div className="divide-y divide-[#deebff]">
-          {messages.map((message) => (
-            <MessageItem key={message.id} {...message} />
-          ))}
-        </div>
+        messages.map((message) => <MessageItem key={message.id} {...message} />)
       )}
     </div>
   );

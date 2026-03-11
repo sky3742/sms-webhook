@@ -1,22 +1,36 @@
 export const ApiEndpointInfo = () => {
   return (
-    <div className="mt-6 rounded-2xl border border-white/70 bg-white/75 p-4 shadow-[0_24px_64px_-38px_rgba(16,33,58,0.35)]">
-      <h3 className="mb-2 text-sm font-semibold text-[#12365e] sm:text-base">
-        Webhook Endpoint
-      </h3>
-      <code className="rounded bg-[#e5f0ff] px-2 py-1 text-xs text-[#0e5cad] sm:text-sm">
-        POST /api/webhook
-      </code>
-      <p className="mt-2 text-xs text-[#4d6283] sm:text-sm">
-        Custom forwarder payload:{" "}
-        <code className="rounded bg-[#e5f0ff] px-1">
-          {JSON.stringify({ sender: "+1234567890", message: "Hello" })}
-        </code>
-      </p>
-      <p className="mt-1 text-xs text-[#4d6283] sm:text-sm">
-        Optional header:{" "}
-        <code className="rounded bg-[#e5f0ff] px-1">X-Webhook-Token</code>
-      </p>
-    </div>
+    <details className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <summary className="cursor-pointer font-medium text-gray-700">
+        Developer Settings
+      </summary>
+      <div className="mt-3 space-y-3 text-sm text-gray-700">
+        <div>
+          <p className="font-medium text-gray-900">Webhook Endpoint</p>
+          <code className="mt-3 block overflow-x-auto rounded-md bg-gray-900 p-3 text-sm text-gray-100">
+            POST /api/webhook
+          </code>
+        </div>
+        <div>
+          <p className="font-medium text-gray-900">Payload Example</p>
+          <pre className="mt-3 overflow-x-auto rounded-md bg-gray-900 p-3 text-sm text-gray-100">
+            {JSON.stringify(
+              {
+                sender: "+1234567890",
+                message: "Hello",
+              },
+              null,
+              2,
+            )}
+          </pre>
+        </div>
+        <div>
+          <p className="font-medium text-gray-900">Optional Header</p>
+          <code className="mt-3 block overflow-x-auto rounded-md bg-gray-900 p-3 text-sm text-gray-100">
+            X-Webhook-Token
+          </code>
+        </div>
+      </div>
+    </details>
   );
 };
