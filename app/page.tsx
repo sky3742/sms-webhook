@@ -5,8 +5,7 @@ import { AutoRefreshOnRevisit } from "@/lib/components/AutoRefreshOnRevisit";
 import { LogoutButton } from "@/lib/components/LogoutButton";
 import { MessagesList } from "@/lib/components/MessagesList";
 import { NotificationButton } from "@/lib/components/NotificationButton";
-import { NotificationStatusAnnouncement } from "@/lib/components/NotificationStatusAnnouncement";
-import { RefreshButton } from "@/lib/components/RefreshButton";
+import { NotificationStatusInline } from "@/lib/components/NotificationStatusInline";
 import { getSession } from "@/lib/services/auth";
 import { getAllMessages, getMessageCount } from "@/lib/services/message";
 import { redirect } from "next/navigation";
@@ -24,34 +23,30 @@ export default async function Dashboard() {
   ]);
 
   return (
-    <div className="min-h-screen">
+    <div className="mx-auto max-w-md space-y-5 px-4 py-6">
       <AutoRefreshOnRevisit />
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <NotificationStatusAnnouncement />
 
-        <div className="mb-6 rounded-2xl border border-white/60 bg-white/80 p-5 shadow-[0_24px_64px_-38px_rgba(16,33,58,0.45)] backdrop-blur sm:p-7">
-          <div className="flex-1">
-            <p className="text-xs font-semibold tracking-[0.22em] text-[#0e5cad] uppercase">
-              Secure Inbox
-            </p>
-            <h1 className="mt-2 text-2xl font-bold text-[#10213a] sm:text-4xl">
-              SMS Webhook Dashboard
-            </h1>
-            <p className="mt-2 text-sm text-[#4f5f7a] sm:text-base">
-              Total messages received: {count}
-            </p>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2 sm:mt-6">
-            <RefreshButton />
-            <NotificationButton />
-            <LogoutButton />
-          </div>
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">SMS Webhook Dashboard</h1>
+          <LogoutButton />
         </div>
-
-        <MessagesList messages={messages} />
-
-        <ApiEndpointInfo />
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <NotificationStatusInline />
+          <span>•</span>
+          <span>Total messages: {count}</span>
+        </div>
       </div>
+
+      <NotificationButton />
+
+      <div className="border-t border-gray-200" />
+
+      <MessagesList messages={messages} />
+
+      <div className="border-t border-gray-200" />
+
+      <ApiEndpointInfo />
     </div>
   );
 }
