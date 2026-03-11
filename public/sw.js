@@ -29,11 +29,37 @@ self.addEventListener("activate", (event) => {
 
 // Handle fetch requests
 self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const isDocument =
+    request.mode === "navigate" || request.destination === "document";
+
+  if (isDocument) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          return response;
+        })
+        .catch(() =>
+          caches
+            .match(request)
+            .then((response) => response || caches.match("/")),
+        ),
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    }),
+    caches.match(request).then((response) => response || fetch(request)),
   );
+});
+
+// Allow the client to trigger skipWaiting
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 // Handle push notifications from server

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fira_Code, Space_Grotesk } from "next/font/google";
+import { ServiceWorkerUpdater } from "@/lib/components/ServiceWorkerUpdater";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -39,6 +40,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${firaCode.variable} antialiased`}
       >
+        <ServiceWorkerUpdater />
         {children}
       </body>
     </html>
