@@ -6,6 +6,7 @@ import { LogoutButton } from "@/lib/components/LogoutButton";
 import { MessagesList } from "@/lib/components/MessagesList";
 import { NotificationButton } from "@/lib/components/NotificationButton";
 import { NotificationStatusInline } from "@/lib/components/NotificationStatusInline";
+import { PullToRefresh } from "@/lib/components/PullToRefresh";
 import { getSession } from "@/lib/services/auth";
 import { getAllMessages, getMessageCount } from "@/lib/services/message";
 import { redirect } from "next/navigation";
@@ -25,6 +26,7 @@ export default async function Dashboard() {
   return (
     <div className="mx-auto max-w-md space-y-5 px-4 py-6">
       <AutoRefreshOnRevisit />
+      <PullToRefresh />
 
       <div className="space-y-1">
         <div className="flex items-center justify-between">
