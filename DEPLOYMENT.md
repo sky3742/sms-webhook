@@ -10,8 +10,9 @@ TURSO_DATABASE_URL=libsql://your-db.turso.io
 TURSO_AUTH_TOKEN=your-auth-token
 
 # VAPID Keys for Push Notifications
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=NEXT_PUBLIC_VAPID_PUBLIC_KEY=<REDACTED_FOR_HISTORY>
-VAPID_PRIVATE_KEY=VAPID_PRIVATE_KEY=<REDACTED_FOR_HISTORY>
+# Run `npx web-push generate-vapid-keys` locally and copy the generated public/private pair.
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=your-public-key
+VAPID_PRIVATE_KEY=your-private-key
 ```
 
 ## Deployment Options
