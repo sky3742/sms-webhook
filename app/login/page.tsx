@@ -1,4 +1,5 @@
 import { LoginForm } from "@/lib/components/LoginForm";
+import { PasscodeForm } from "@/lib/components/PasscodeForm";
 import { getSession } from "@/lib/services/auth";
 import { redirect } from "next/navigation";
 
@@ -8,6 +9,8 @@ export default async function LoginPage() {
   if (session) {
     redirect("/");
   }
+
+  const authMode = process.env.AUTH_MODE || "email";
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -20,7 +23,7 @@ export default async function LoginPage() {
           Authenticate to view sensitive SMS messages.
         </p>
         <div className="mt-6">
-          <LoginForm />
+          {authMode === "passcode" ? <PasscodeForm /> : <LoginForm />}
         </div>
       </div>
     </div>
