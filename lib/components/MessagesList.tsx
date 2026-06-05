@@ -1,52 +1,117 @@
+"use client";
+
 import { DeleteMessageButton } from "@/lib/components/DeleteMessageButton";
+import { loadMessages } from "@/lib/services/message";
 import { messages } from "@/lib/repo/schema";
 import { InferSelectModel } from "drizzle-orm";
+import { useState, useTransition } from "react";
+
+type Message = InferSelectModel<typeof messages>;
 
 type MessagesListProps = {
-  messages: Array<InferSelectModel<typeof messages>>;
+  messages: Message[];
+  totalCount: number;
 };
 
-const EmptyMessageState = () => (
-  <div className="py-10 text-center text-gray-500">No SMS received yet</div>
-);
-
 const MessageItem = ({
-  id,
-  subject,
   message,
-  createdAt,
-}: InferSelectModel<typeof messages>) => {
-  const timestamp = new Date(createdAt * 1000).toLocaleString(undefined, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  isExpanded,
+  onToggle,
+}: {
+  message: Message;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) => {
+  const timestamp = new Date(message.createdAt * 1000).toLocaleString(
+    undefined,
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    },
+  );
 
   return (
     <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <p className="truncate font-semibold text-gray-800">
-          📩 {subject || "Unknown Sender"}
+          📩 {message.subject || "Unknown Sender"}
         </p>
-        <DeleteMessageButton id={id} />
+        <DeleteMessageButton id={message.id} />
       </div>
 
-      <p className="mt-2 text-sm text-gray-700">{message}</p>
+      <button
+        className={`mt-2 w-full text-left text-sm text-gray-700 ${isExpanded ? "" : "line-clamp-2"}`}
+        onClick={onToggle}
+        type="button"
+      >
+        {message.message}
+      </button>
 
-      <p className="mt-3 text-xs text-gray-400">{timestamp}</p>
+      <p className="mt-3 text-xs text-gray-400" suppressHydrationWarning>
+        {timestamp}
+      </p>
     </div>
   );
 };
 
-export const MessagesList = ({ messages }: MessagesListProps) => {
+export const MessagesList = ({
+  messages: initialMessages,
+  totalCount,
+}: MessagesListProps) => {
+  const [messages, setMessages] = useState(initialMessages);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(
+    initialMessages.length < totalCount,
+  );
+  const [isPending, startTransition] = useTransition();
+
+  const pageSize = 5;
+
+  const handleToggle = (id: number) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
+  const handleLoadMore = () => {
+    startTransition(async () => {
+      const nextMessages = await loadMessages(page, pageSize);
+      if (nextMessages.length < pageSize) {
+        setHasMore(false);
+      }
+      setMessages((prev) => [...prev, ...nextMessages]);
+      setPage((prev) => prev + 1);
+    });
+  };
+
   return (
     <div className="space-y-4">
       {messages.length === 0 ? (
-        <EmptyMessageState />
+        <div className="py-10 text-center text-gray-500">
+          No SMS received yet
+        </div>
       ) : (
-        messages.map((message) => <MessageItem key={message.id} {...message} />)
+        messages.map((message) => (
+          <MessageItem
+            key={message.id}
+            message={message}
+            isExpanded={expandedId === message.id}
+            onToggle={() => handleToggle(message.id)}
+          />
+        ))
+      )}
+
+      {hasMore && (
+        <button
+          className="w-full rounded-xl border border-gray-200 bg-white py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isPending}
+          onClick={handleLoadMore}
+          type="button"
+        >
+          {isPending ? "Loading..." : "Load more"}
+        </button>
       )}
     </div>
   );

@@ -19,7 +19,7 @@ export default async function Dashboard() {
   }
 
   const [messages, count] = await Promise.all([
-    getAllMessages(50),
+    getAllMessages(5),
     getMessageCount(),
   ]);
 
@@ -44,7 +44,7 @@ export default async function Dashboard() {
 
       <div className="border-t border-gray-200" />
 
-      <MessagesList messages={messages} />
+      <MessagesList messages={messages} totalCount={count} />
 
       <div className="border-t border-gray-200" />
 

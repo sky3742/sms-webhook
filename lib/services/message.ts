@@ -43,6 +43,15 @@ export async function deleteMessage(id: number) {
   return result.rowsAffected !== undefined ? result.rowsAffected > 0 : true;
 }
 
+export async function loadMessages(page: number, pageSize: number = 5) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  return getAllMessages(pageSize, page * pageSize);
+}
+
 export async function getMessageCount() {
   return db.$count(messages);
 }
