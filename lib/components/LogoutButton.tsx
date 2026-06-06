@@ -14,7 +14,7 @@ export const LogoutButton = () => {
 
   return (
     <button
-      className="text-gray-400 hover:text-gray-600"
+      className="text-gray-400 transition-colors hover:text-gray-600"
       onClick={handleLogout}
       type="button"
       title="Sign out"

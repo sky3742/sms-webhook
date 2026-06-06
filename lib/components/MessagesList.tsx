@@ -34,23 +34,26 @@ const MessageItem = ({
   );
 
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+    <div className="py-3">
       <div className="flex items-center justify-between">
-        <p className="truncate font-semibold text-gray-800">
-          📩 {message.subject || "Unknown Sender"}
+        <p className="truncate text-sm font-semibold text-gray-800">
+          {message.subject || "Unknown Sender"}
         </p>
         <DeleteMessageButton id={message.id} />
       </div>
 
       <button
-        className={`mt-2 w-full text-left text-sm text-gray-700 ${isExpanded ? "" : "line-clamp-2"}`}
+        className={`mt-1 w-full text-left text-sm text-gray-600 ${isExpanded ? "" : "line-clamp-2"}`}
         onClick={onToggle}
         type="button"
       >
         {message.message}
       </button>
 
-      <p className="mt-3 text-xs text-gray-400" suppressHydrationWarning>
+      <p
+        className="mt-1 text-xs text-gray-400"
+        suppressHydrationWarning
+      >
         {timestamp}
       </p>
     </div>
@@ -87,7 +90,7 @@ export const MessagesList = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="divide-y divide-gray-200">
       {messages.length === 0 ? (
         <div className="py-10 text-center text-gray-500">
           No SMS received yet
@@ -105,7 +108,7 @@ export const MessagesList = ({
 
       {hasMore && (
         <button
-          className="w-full rounded-xl border border-gray-200 bg-white py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full py-2 text-sm font-medium text-gray-500 transition hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={isPending}
           onClick={handleLoadMore}
           type="button"

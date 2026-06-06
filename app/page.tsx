@@ -24,31 +24,31 @@ export default async function Dashboard() {
   ]);
 
   return (
-    <div className="mx-auto max-w-md space-y-5 px-4 py-6">
+    <div className="mx-auto max-w-md px-4 py-4">
       <AutoRefreshOnRevisit />
       <PullToRefresh />
 
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">SMS Webhook Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-semibold tracking-tight">SMS Webhook</h1>
+        <div className="flex items-center gap-3">
+          <NotificationButton />
           <LogoutButton />
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <NotificationStatusInline />
-          <span>•</span>
-          <span>Total messages: {count}</span>
         </div>
       </div>
 
-      <NotificationButton />
+      <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+        <NotificationStatusInline />
+        <span aria-hidden="true">·</span>
+        <span>{count} messages</span>
+      </div>
 
-      <div className="border-t border-gray-200" />
+      <div className="mt-4">
+        <MessagesList messages={messages} totalCount={count} />
+      </div>
 
-      <MessagesList messages={messages} totalCount={count} />
-
-      <div className="border-t border-gray-200" />
-
-      <ApiEndpointInfo />
+      <div className="mt-6">
+        <ApiEndpointInfo />
+      </div>
     </div>
   );
 }

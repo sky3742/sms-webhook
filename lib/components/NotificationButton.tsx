@@ -4,51 +4,6 @@ import { useNotificationStatus } from "@/lib/stores/notification";
 import { usePushNotifications } from "@/lib/utils/notifications";
 import { useSyncExternalStore } from "react";
 
-type NotificationButtonBaseProps = {
-  onClick: () => void;
-  label: string;
-  className: string;
-  disabled?: boolean;
-};
-
-const NotificationButtonBase = ({
-  onClick,
-  label,
-  className,
-  disabled = false,
-}: NotificationButtonBaseProps) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className={`w-full py-3 bg-indigo-600 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-  >
-    {label}
-  </button>
-);
-
-const TestNotificationButton = ({ onClick }: { onClick: () => void }) => (
-  <NotificationButtonBase
-    onClick={onClick}
-    label="Test Notification"
-    className="hover:bg-indigo-700"
-  />
-);
-
-const EnableNotificationButton = ({
-  onClick,
-  loading,
-}: {
-  onClick: () => void;
-  loading: boolean;
-}) => (
-  <NotificationButtonBase
-    onClick={onClick}
-    label={loading ? "Subscribing..." : "Enable Notifications"}
-    className="hover:bg-indigo-700"
-    disabled={loading}
-  />
-);
-
 export const NotificationButton = () => {
   const mounted = useSyncExternalStore(
     () => () => {},
@@ -63,14 +18,55 @@ export const NotificationButton = () => {
     return null;
   }
 
-  if (permission === "granted") {
-    return <TestNotificationButton onClick={handleSendTestNotification} />;
-  }
+  const isEnabled = permission === "granted";
 
   return (
-    <EnableNotificationButton
-      onClick={handleEnableNotifications}
-      loading={loading}
-    />
+    <button
+      className="text-gray-400 transition-colors hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+      disabled={loading}
+      onClick={isEnabled ? handleSendTestNotification : handleEnableNotifications}
+      title={isEnabled ? "Test notification" : "Enable notifications"}
+      aria-label={isEnabled ? "Test notification" : "Enable notifications"}
+      type="button"
+    >
+      {loading ? (
+        <svg
+          className="h-5 w-5 animate-spin"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+      )}
+    </button>
   );
 };
