@@ -5,7 +5,7 @@ import { DeleteMessageButton } from "@/lib/components/DeleteMessageButton";
 import { loadMessages } from "@/lib/services/message-actions";
 import { messages } from "@/lib/repo/schema";
 import { InferSelectModel } from "drizzle-orm";
-import { useState, useTransition } from "react";
+import { useState, useTransition, memo } from "react";
 
 type Message = InferSelectModel<typeof messages>;
 
@@ -14,7 +14,7 @@ type MessagesListProps = {
   totalCount: number;
 };
 
-const MessageItem = ({
+const MessageItem = memo(({
   message,
   isExpanded,
   onToggle,
@@ -59,7 +59,9 @@ const MessageItem = ({
       </p>
     </div>
   );
-};
+});
+
+MessageItem.displayName = "MessageItem";
 
 export const MessagesList = ({
   messages: initialMessages,
