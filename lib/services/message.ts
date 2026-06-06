@@ -3,7 +3,7 @@ import { messages } from "@/lib/repo/schema";
 import { desc } from "drizzle-orm";
 
 export async function addMessage(subject: string, messageText: string) {
-  const timestamp = Math.floor(Date.now() / 1000);
+  const timestamp = new Date();
 
   const result = await db
     .insert(messages)

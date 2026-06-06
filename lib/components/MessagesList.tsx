@@ -23,7 +23,7 @@ const MessageItem = memo(({
   isExpanded: boolean;
   onToggle: () => void;
 }) => {
-  const timestamp = new Date(message.createdAt * 1000).toLocaleString(
+  const timestamp = message.createdAt.toLocaleString(
     undefined,
     {
       day: "numeric",

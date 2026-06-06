@@ -4,7 +4,7 @@ export const messages = sqliteTable("messages", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   subject: text("subject").notNull(),
   message: text("message").notNull(),
-  createdAt: integer("created_at").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
 export const pushSubscriptions = sqliteTable("push_subscriptions", {
@@ -12,7 +12,7 @@ export const pushSubscriptions = sqliteTable("push_subscriptions", {
   endpoint: text("endpoint").unique().notNull(),
   p256dh: text("p256dh").notNull(),
   auth: text("auth").notNull(),
-  createdAt: integer("created_at").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
 export const user = sqliteTable("user", {

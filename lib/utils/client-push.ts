@@ -3,7 +3,7 @@ import { saveSubscription } from "@/lib/services/pushSubscription-actions";
 // Client-side push notification subscription
 export async function subscribeToPushNotifications() {
   try {
-    const registration = await navigator.serviceWorker.register("/sw.js");
+    const registration = await navigator.serviceWorker.ready;
     const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
     if (!vapidKey) {
       throw new Error("NEXT_PUBLIC_VAPID_PUBLIC_KEY is missing");
@@ -22,7 +22,7 @@ export async function subscribeToPushNotifications() {
       endpoint: subscription.endpoint,
       p256dh: sub.keys?.["p256dh"] || "",
       auth: sub.keys?.["auth"] || "",
-      createdAt: Math.floor(Date.now() / 1000),
+      createdAt: new Date(),
     });
 
     return subscription;

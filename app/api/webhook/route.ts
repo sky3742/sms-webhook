@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         message_id: message.id,
-        timestamp: message.createdAt,
+        timestamp: message.createdAt.toISOString(),
         sender: formattedSender,
         notifications_sent: sentCount,
       },
