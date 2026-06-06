@@ -1,14 +1,10 @@
 "use client";
 
+import { useMounted } from "@/lib/hooks/useMounted";
 import { useNotificationStatus } from "@/lib/stores/notification";
-import { useSyncExternalStore } from "react";
 
 export const NotificationStatusInline = () => {
-  const mounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
+  const mounted = useMounted();
   const { supported, permission, loading } = useNotificationStatus();
 
   if (!mounted) {

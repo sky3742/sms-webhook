@@ -1,15 +1,11 @@
 "use client";
 
+import { useMounted } from "@/lib/hooks/useMounted";
 import { useNotificationStatus } from "@/lib/stores/notification";
 import { usePushNotifications } from "@/lib/utils/notifications";
-import { useSyncExternalStore } from "react";
 
 export const NotificationButton = () => {
-  const mounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
+  const mounted = useMounted();
   const { loading, permission, supported } = useNotificationStatus();
   const { handleEnableNotifications, handleSendTestNotification } =
     usePushNotifications();
