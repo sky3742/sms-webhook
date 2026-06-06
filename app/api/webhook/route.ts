@@ -20,13 +20,13 @@ function normalizeSender(sender: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as WebhookPayload;
-    const configuredToken = process.env.WEBHOOK_AUTH_TOKEN;
+    const configuredToken = process.env.WEBHOOK_AUTH_TOKEN?.trim();
     const headerToken =
       request.headers.get("x-webhook-token") ||
       request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     const payloadToken =
       typeof body.token === "string" ? body.token.trim() : undefined;
-    const providedToken = headerToken || payloadToken;
+    const providedToken = (headerToken || payloadToken)?.trim();
 
     if (configuredToken && providedToken !== configuredToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
