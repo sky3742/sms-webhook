@@ -99,7 +99,16 @@ export async function POST(request: NextRequest) {
 }
 
 // Health check endpoint
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const configuredToken = process.env.WEBHOOK_AUTH_TOKEN?.trim();
+  const headerToken =
+    request.headers.get("x-webhook-token") ||
+    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+
+  if (configuredToken && headerToken !== configuredToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const count = await getMessageCount();
 
   return NextResponse.json({
