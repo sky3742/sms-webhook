@@ -29,6 +29,7 @@ export const PasscodeForm = () => {
       return;
     }
 
+    setIsSubmitting(false);
     router.replace("/");
     router.refresh();
   };
