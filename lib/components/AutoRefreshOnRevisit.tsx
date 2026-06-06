@@ -1,9 +1,8 @@
 "use client";
 
+import { MIN_REFRESH_INTERVAL_MS } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-
-const MIN_REFRESH_INTERVAL_MS = 5000;
 
 export const AutoRefreshOnRevisit = () => {
   const { refresh } = useRouter();

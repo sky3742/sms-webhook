@@ -1,16 +1,17 @@
 "use client";
 
+import { MIN_REFRESH_INTERVAL_MS } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const THRESHOLD_PX = 80;
-const MIN_REFRESH_INTERVAL_MS = 5000;
 
 export const PullToRefresh = () => {
   const { refresh } = useRouter();
   const startY = useRef<number | null>(null);
   const lastRefreshAt = useRef(0);
   const armed = useRef(false);
+  const isRefreshingRef = useRef(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -56,10 +57,12 @@ export const PullToRefresh = () => {
 
       lastRefreshAt.current = now;
       armed.current = false;
+      isRefreshingRef.current = true;
       setIsRefreshing(true);
       setPullDistance(THRESHOLD_PX);
       refresh();
       window.setTimeout(() => {
+        isRefreshingRef.current = false;
         setIsRefreshing(false);
         setPullDistance(0);
       }, 1200);
@@ -68,7 +71,7 @@ export const PullToRefresh = () => {
     const onTouchEnd = () => {
       startY.current = null;
       armed.current = false;
-      if (!isRefreshing) {
+      if (!isRefreshingRef.current) {
         setPullDistance(0);
       }
     };
@@ -84,7 +87,7 @@ export const PullToRefresh = () => {
       window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("touchcancel", onTouchEnd);
     };
-  }, [isRefreshing, refresh]);
+  }, [refresh]);
 
   const showIndicator = pullDistance > 0 || isRefreshing;
   const isReady = pullDistance >= THRESHOLD_PX && !isRefreshing;
