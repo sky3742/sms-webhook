@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteMessage } from "@/lib/services/message";
+import { deleteMessage } from "@/lib/services/message-actions";
 
 type DeleteMessageButtonProps = {
   id: number;

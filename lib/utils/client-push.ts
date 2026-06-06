@@ -1,4 +1,4 @@
-import { saveSubscription } from "@/lib/services/pushSubscription";
+import { saveSubscription } from "@/lib/services/pushSubscription-actions";
 
 // Client-side push notification subscription
 export async function subscribeToPushNotifications() {

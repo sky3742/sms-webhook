@@ -1,7 +1,7 @@
 "use client";
 
 import { DeleteMessageButton } from "@/lib/components/DeleteMessageButton";
-import { loadMessages } from "@/lib/services/message";
+import { loadMessages } from "@/lib/services/message-actions";
 import { messages } from "@/lib/repo/schema";
 import { InferSelectModel } from "drizzle-orm";
 import { useState, useTransition } from "react";
