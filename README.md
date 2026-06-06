@@ -4,10 +4,12 @@ A Next.js application that receives SMS messages via webhook and displays them i
 
 ## Features
 
-- **Webhook Endpoint**: Receives SMS messages from SMS Forwarder
-- **SQLite Storage**: All messages are stored in a local SQLite database
-- **Dashboard**: View all received messages with timestamps
-- **Real-time Updates**: Auto-refreshes when tab/window is revisited
+- **Webhook Endpoint**: Receives SMS messages via webhook
+- **Push Notifications**: Browser push notifications with VAPID authentication
+- **Auth Modes**: Email/password or passcode-based login
+- **Dashboard**: View messages with expand/collapse, pagination, and pull-to-refresh
+- **Real-time Updates**: Auto-refreshes when tab is revisited
+- **Security**: Rate limiting, timing-safe comparisons, security headers
 
 ## Setup
 
@@ -31,9 +33,12 @@ Required auth/security variables:
 
 Optional:
 
+- `AUTH_MODE` — `email` (default) or `passcode`
+- `AUTH_PASSCODE` — secret passcode when `AUTH_MODE=passcode`
 - `WEBHOOK_AUTH_TOKEN` (recommended for anti-spam/fake SMS protection)
 - `PUSH_NOTIFICATION_ICON` and `PUSH_NOTIFICATION_BADGE` (icon customization)
   - defaults: `/notification-icon.png` and `/notification-badge.png`
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_CONTACT_EMAIL` (for push notifications)
 
 3. **Run database migrations**:
 
@@ -90,7 +95,9 @@ The server responds with:
 {
   "success": true,
   "message_id": 1,
-  "timestamp": 1234567890
+  "timestamp": "2026-06-06T00:00:00.000Z",
+  "sender": "+1234567890",
+  "notifications_sent": 1
 }
 ```
 
@@ -115,13 +122,15 @@ Receive SMS messages from SMS Forwarder.
 {
   "success": true,
   "message_id": 1,
-  "timestamp": 1234567890
+  "timestamp": "2026-06-06T00:00:00.000Z",
+  "sender": "+1234567890",
+  "notifications_sent": 1
 }
 ```
 
 ### GET /api/webhook
 
-Health check endpoint.
+Health check endpoint. Requires `WEBHOOK_AUTH_TOKEN` if set.
 
 **Response:**
 
@@ -129,7 +138,7 @@ Health check endpoint.
 {
   "status": "ok",
   "message_count": 10,
-  "timestamp": 1234567890
+  "timestamp": 1780000000000
 }
 ```
 
@@ -154,7 +163,18 @@ CREATE TABLE messages (
     message TEXT NOT NULL,
     created_at INTEGER NOT NULL
 );
+
+CREATE TABLE push_subscriptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    endpoint TEXT UNIQUE NOT NULL,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+);
 ```
+
+Additional tables (`user`, `session`, `account`, `verification`) are managed by
+[better-auth](https://www.better-auth.com/).
 
 ## Deployment
 
@@ -202,10 +222,11 @@ Example: `https://your-app.vercel.app/api/webhook`
 ## Security Notes
 
 1. **HTTPS**: Use HTTPS in production for secure webhook delivery
-2. **Dashboard Auth**: Better Auth protects the dashboard and delete actions
+2. **Dashboard Auth**: Better Auth protects the dashboard and delete actions (email/password or passcode mode)
 3. **Webhook Token (Optional)**: Set `WEBHOOK_AUTH_TOKEN` and send it via `X-Webhook-Token` or `Authorization: Bearer ...`
-4. **Push Notification Branding**: Customize `PUSH_NOTIFICATION_ICON` and `PUSH_NOTIFICATION_BADGE`
-5. **Rate Limiting**: Implement rate limiting to reduce abuse and spam records
+4. **Rate Limiting**: Passcode endpoint is rate-limited (5 attempts / 15 min per IP)
+5. **Push Notifications**: Requires VAPID keys (`npx web-push generate-vapid-keys`)
+6. **Security Headers**: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
 
 ## Troubleshooting
 
