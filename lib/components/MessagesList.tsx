@@ -1,5 +1,6 @@
 "use client";
 
+import { PAGE_SIZE } from "@/lib/constants";
 import { DeleteMessageButton } from "@/lib/components/DeleteMessageButton";
 import { loadMessages } from "@/lib/services/message-actions";
 import { messages } from "@/lib/repo/schema";
@@ -72,16 +73,14 @@ export const MessagesList = ({
   );
   const [isPending, startTransition] = useTransition();
 
-  const pageSize = 5;
-
   const handleToggle = (id: number) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
   const handleLoadMore = () => {
     startTransition(async () => {
-      const nextMessages = await loadMessages(page, pageSize);
-      if (nextMessages.length < pageSize) {
+      const nextMessages = await loadMessages(page, PAGE_SIZE);
+      if (nextMessages.length < PAGE_SIZE) {
         setHasMore(false);
       }
       setMessages((prev) => [...prev, ...nextMessages]);
