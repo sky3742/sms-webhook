@@ -4,9 +4,6 @@
   --background: #f7f9fc;
   --surface: #ffffff;
   --foreground: #10213a;
-  --muted: #66748f;
-  --accent: #0b7a75;
-  --accent-2: #0e5cad;
 }
 
 @theme inline {

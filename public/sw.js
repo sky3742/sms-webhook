@@ -64,8 +64,6 @@ self.addEventListener("message", (event) => {
 
 // Handle push notifications from server
 self.addEventListener("push", (event) => {
-  console.log("Push event received:", event);
-
   let data = { title: "New SMS", body: "You have a new message" };
 
   if (event.data) {
@@ -101,7 +99,6 @@ self.addEventListener("push", (event) => {
 
 // Handle notification click
 self.addEventListener("notificationclick", (event) => {
-  console.log("Notification click:", event);
   event.notification.close();
 
   if (event.action === "close") {
