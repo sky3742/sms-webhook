@@ -69,7 +69,9 @@ export const MessagesList = ({
 }: MessagesListProps) => {
   const [messages, setMessages] = useState(initialMessages);
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState(
+    () => initialMessages.at(-1)?.id ?? 0,
+  );
   const [hasMore, setHasMore] = useState(
     initialMessages.length < totalCount,
   );
@@ -81,7 +83,7 @@ export const MessagesList = ({
 
   const handleLoadMore = () => {
     startTransition(async () => {
-      const nextMessages = await loadMessages(page, PAGE_SIZE);
+      const nextMessages = await loadMessages(cursor, PAGE_SIZE);
       if (nextMessages.length < PAGE_SIZE) {
         setHasMore(false);
       }
@@ -90,7 +92,9 @@ export const MessagesList = ({
         const unique = nextMessages.filter((m) => !existingIds.has(m.id));
         return [...prev, ...unique];
       });
-      setPage((prev) => prev + 1);
+      if (nextMessages.length > 0) {
+        setCursor(nextMessages.at(-1)!.id);
+      }
     });
   };
 
