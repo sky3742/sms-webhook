@@ -7,9 +7,14 @@ type DeleteMessageButtonProps = {
 };
 
 export const DeleteMessageButton = ({ id }: DeleteMessageButtonProps) => {
+  const handleDelete = () => {
+    if (!confirm("Delete this message?")) return;
+    deleteMessage(id);
+  };
+
   return (
     <button
-      onClick={() => deleteMessage(id)}
+      onClick={handleDelete}
       className="text-gray-400 hover:text-red-500 cursor-pointer"
       aria-label="Delete message"
     >
