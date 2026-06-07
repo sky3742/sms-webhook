@@ -7,7 +7,6 @@ import { NextRequest, NextResponse } from "next/server";
 type WebhookPayload = {
   sender?: unknown;
   message?: unknown;
-  token?: unknown;
 };
 
 function normalizeSender(sender: string): string {
@@ -25,11 +24,8 @@ export async function POST(request: NextRequest) {
     const headerToken =
       request.headers.get("x-webhook-token") ||
       request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-    const payloadToken =
-      typeof body.token === "string" ? body.token.trim() : undefined;
-    const providedToken = (headerToken || payloadToken)?.trim();
 
-    if (configuredToken && !timingSafeCompare(providedToken ?? "", configuredToken)) {
+    if (configuredToken && !timingSafeCompare(headerToken ?? "", configuredToken)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

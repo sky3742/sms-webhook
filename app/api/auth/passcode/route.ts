@@ -62,10 +62,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid passcode" }, { status: 401 });
   }
 
+  const cookie = request.headers.get("cookie");
   const resp = await auth.api.signInEmail({
     body: { email: adminEmail, password: adminPassword },
     asResponse: true,
-    headers: request.headers,
+    headers: cookie ? { cookie } : undefined,
   });
 
   const response = NextResponse.json({ ok: true }, { status: resp.status });
