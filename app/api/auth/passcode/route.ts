@@ -1,13 +1,6 @@
 import { auth } from "@/lib/auth";
-import { timingSafeEqual } from "crypto";
+import { timingSafeCompare } from "@/lib/utils/crypto";
 import { NextResponse } from "next/server";
-
-function timingSafeCompare(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
-  if (bufA.length !== bufB.length) return false;
-  return timingSafeEqual(bufA, bufB);
-}
 
 const attempts = new Map<string, { count: number; resetAt: number }>();
 const MAX_ATTEMPTS = 5;

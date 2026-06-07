@@ -1,6 +1,7 @@
 import { addMessage, getMessageCount } from "@/lib/services/message";
 import { getAllSubscriptions } from "@/lib/services/pushSubscription";
 import { sendPushNotificationToAll } from "@/lib/services/webPush";
+import { timingSafeCompare } from "@/lib/utils/crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 type WebhookPayload = {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
       typeof body.token === "string" ? body.token.trim() : undefined;
     const providedToken = (headerToken || payloadToken)?.trim();
 
-    if (configuredToken && providedToken !== configuredToken) {
+    if (configuredToken && !timingSafeCompare(providedToken ?? "", configuredToken)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -105,7 +106,7 @@ export async function GET(request: NextRequest) {
     request.headers.get("x-webhook-token") ||
     request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
 
-  if (configuredToken && headerToken !== configuredToken) {
+  if (configuredToken && !timingSafeCompare(headerToken ?? "", configuredToken)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
