@@ -16,11 +16,18 @@ export const PasscodeForm = () => {
     const formData = new FormData(event.currentTarget);
     const passcode = String(formData.get("passcode") || "");
 
-    const res = await fetch("/api/auth/passcode", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passcode }),
-    });
+    let res: Response;
+    try {
+      res = await fetch("/api/auth/passcode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode }),
+      });
+    } catch {
+      setErrorMessage("Network error. Please try again.");
+      setIsSubmitting(false);
+      return;
+    }
 
     if (!res.ok) {
       const data = await res.json().catch(() => null);
