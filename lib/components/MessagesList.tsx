@@ -85,7 +85,11 @@ export const MessagesList = ({
       if (nextMessages.length < PAGE_SIZE) {
         setHasMore(false);
       }
-      setMessages((prev) => [...prev, ...nextMessages]);
+      setMessages((prev) => {
+        const existingIds = new Set(prev.map((m) => m.id));
+        const unique = nextMessages.filter((m) => !existingIds.has(m.id));
+        return [...prev, ...unique];
+      });
       setPage((prev) => prev + 1);
     });
   };
