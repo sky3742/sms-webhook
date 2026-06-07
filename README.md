@@ -76,8 +76,7 @@ strict payload:
 ```json
 {
   "sender": "+1234567890",
-  "message": "SMS content",
-  "token": "optional-token"
+  "message": "SMS content"
 }
 ```
 
@@ -85,7 +84,6 @@ Recommended auth:
 
 - Put token in header: `X-Webhook-Token: <token>`
 - Or send `Authorization: Bearer <token>`
-- Body `token` is also accepted for compatibility
 
 ### Response
 
@@ -191,7 +189,7 @@ vercel
 ### Docker
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:24-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
@@ -226,7 +224,7 @@ Example: `https://your-app.vercel.app/api/webhook`
 3. **Webhook Token (Optional)**: Set `WEBHOOK_AUTH_TOKEN` and send it via `X-Webhook-Token` or `Authorization: Bearer ...`
 4. **Rate Limiting**: Passcode endpoint is rate-limited (5 attempts / 15 min per IP)
 5. **Push Notifications**: Requires VAPID keys (`npx web-push generate-vapid-keys`)
-6. **Security Headers**: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+6. **Security Headers**: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Content-Security-Policy
 
 ## Troubleshooting
 
